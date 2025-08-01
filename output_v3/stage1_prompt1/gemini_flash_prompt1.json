@@ -1,0 +1,86 @@
+{
+  "parsed_json": {
+    "log_type": "Windows Authentication Log",
+    "follow_up_queries": [
+      "threat hunting queries for Windows authentication logs",
+      "common attack vectors related to Windows logon events"
+    ],
+    "fields": {
+      "source_computer": {
+        "type": "string",
+        "description": "The name of the source computer involved in the authentication event.",
+        "OCSF": "src.host.name",
+        "ECS": "source.host.name",
+        "OSSEM": "source.host.name",
+        "importance": 8
+      },
+      "destination_computer": {
+        "type": "string",
+        "description": "The name of the destination computer involved in the authentication event.",
+        "OCSF": "dst.host.name",
+        "ECS": "destination.host.name",
+        "OSSEM": "destination.host.name",
+        "importance": 8
+      },
+      "auth_type": {
+        "type": "string",
+        "description": "The type of authentication protocol used (e.g., Kerberos, NTLM).",
+        "OCSF": "auth.auth_protocol",
+        "ECS": "authentication.type",
+        "OSSEM": "logon.authentication_package_name",
+        "importance": 9
+      },
+      "logon_type": {
+        "type": "string",
+        "description": "The type of logon that occurred (e.g., Network, Interactive).",
+        "OCSF": "auth.logon_type",
+        "ECS": "logon.type",
+        "OSSEM": "logon.logon_type",
+        "importance": 9
+      },
+      "times": {
+        "type": "array",
+        "description": "An array of timestamps associated with the event. The format appears to be a Unix timestamp.",
+        "OCSF": "time",
+        "ECS": "@timestamp",
+        "OSSEM": "time",
+        "importance": 7
+      },
+      "source_users": {
+        "type": "string",
+        "description": "The user account(s) on the source computer involved in the authentication event. This field can contain multiple users.",
+        "OCSF": "actor.user.name",
+        "ECS": "source.user.name",
+        "OSSEM": "source.user.name",
+        "importance": 9
+      },
+      "destination_users": {
+        "type": "string",
+        "description": "The user account(s) on the destination computer involved in the authentication event. This field can contain multiple users.",
+        "OCSF": "user.name",
+        "ECS": "destination.user.name",
+        "OSSEM": "destination.user.name",
+        "importance": 9
+      },
+      "orientations": {
+        "type": "string",
+        "description": "Indicates the orientation of the event, such as 'LogOn' or 'LogOff'.",
+        "OCSF": "activity_name",
+        "ECS": "event.action",
+        "OSSEM": "event.action",
+        "importance": 8
+      },
+      "statuses": {
+        "type": "string",
+        "description": "The status of the authentication attempt (e.g., Success, Failure).",
+        "OCSF": "status",
+        "ECS": "event.outcome",
+        "OSSEM": "status",
+        "importance": 10
+      }
+    }
+  },
+  "raw_response": "```json\n{\n  \"log_type\": \"Windows Authentication Log\",\n  \"follow_up_queries\": [\n    \"threat hunting queries for Windows authentication logs\",\n    \"common attack vectors related to Windows logon events\"\n  ],\n  \"fields\": {\n    \"source_computer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the source computer involved in the authentication event.\",\n      \"OCSF\": \"src.host.name\",\n      \"ECS\": \"source.host.name\",\n      \"OSSEM\": \"source.host.name\",\n      \"importance\": 8\n    },\n    \"destination_computer\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the destination computer involved in the authentication event.\",\n      \"OCSF\": \"dst.host.name\",\n      \"ECS\": \"destination.host.name\",\n      \"OSSEM\": \"destination.host.name\",\n      \"importance\": 8\n    },\n    \"auth_type\": {\n      \"type\": \"string\",\n      \"description\": \"The type of authentication protocol used (e.g., Kerberos, NTLM).\",\n      \"OCSF\": \"auth.auth_protocol\",\n      \"ECS\": \"authentication.type\",\n      \"OSSEM\": \"logon.authentication_package_name\",\n      \"importance\": 9\n    },\n    \"logon_type\": {\n      \"type\": \"string\",\n      \"description\": \"The type of logon that occurred (e.g., Network, Interactive).\",\n      \"OCSF\": \"auth.logon_type\",\n      \"ECS\": \"logon.type\",\n      \"OSSEM\": \"logon.logon_type\",\n      \"importance\": 9\n    },\n    \"times\": {\n      \"type\": \"array\",\n      \"description\": \"An array of timestamps associated with the event. The format appears to be a Unix timestamp.\",\n      \"OCSF\": \"time\",\n      \"ECS\": \"@timestamp\",\n      \"OSSEM\": \"time\",\n      \"importance\": 7\n    },\n    \"source_users\": {\n      \"type\": \"string\",\n      \"description\": \"The user account(s) on the source computer involved in the authentication event. This field can contain multiple users.\",\n      \"OCSF\": \"actor.user.name\",\n      \"ECS\": \"source.user.name\",\n      \"OSSEM\": \"source.user.name\",\n      \"importance\": 9\n    },\n    \"destination_users\": {\n      \"type\": \"string\",\n      \"description\": \"The user account(s) on the destination computer involved in the authentication event. This field can contain multiple users.\",\n      \"OCSF\": \"user.name\",\n      \"ECS\": \"destination.user.name\",\n      \"OSSEM\": \"destination.user.name\",\n      \"importance\": 9\n    },\n    \"orientations\": {\n      \"type\": \"string\",\n      \"description\": \"Indicates the orientation of the event, such as 'LogOn' or 'LogOff'.\",\n      \"OCSF\": \"activity_name\",\n      \"ECS\": \"event.action\",\n      \"OSSEM\": \"event.action\",\n      \"importance\": 8\n    },\n    \"statuses\": {\n      \"type\": \"string\",\n      \"description\": \"The status of the authentication attempt (e.g., Success, Failure).\",\n      \"OCSF\": \"status\",\n      \"ECS\": \"event.outcome\",\n      \"OSSEM\": \"status\",\n      \"importance\": 10\n    }\n  }\n}\n```",
+  "model": "gemini-2.5-flash",
+  "provider": "gemini_flash"
+}

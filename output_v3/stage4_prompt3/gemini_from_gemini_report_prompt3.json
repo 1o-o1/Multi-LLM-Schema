@@ -1,0 +1,348 @@
+{
+  "parsed_json": {
+    "Log_context": {
+      "log_type": "Windows Authentication Logs",
+      "log_description": "A critical data source for detecting and responding to a wide array of cyber threats. These logs are fundamental to security monitoring as they capture the core of user and system activity within a Windows environment: every logon, logoff, and authentication attempt. They are crucial for detecting lateral movement, credential dumping, Pass-the-Hash, brute-force attacks, and the abuse of legitimate administrative tools."
+    },
+    "observations": {
+      "behavioral_patterns": {
+        "malicious": [
+          {
+            "pattern_name": "High Volume of Failed Logons (Brute Force)",
+            "Instruction": "A large number of failed logon attempts from a single source computer targeting one or more destination users in a short time frame. This is a classic indicator of a brute-force or password spraying attack.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "destination_users: List",
+              "statuses: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Successful Logon After Multiple Failures",
+            "Instruction": "A sequence of failed logon events (`statuses`: \"Failure\") followed immediately by a successful logon (`statuses`: \"Success\") for the same user. This can indicate a successful password guessing attempt.",
+            "identifiable_fields": [
+              "destination_users: List",
+              "source_computer: List",
+              "statuses: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "NTLM Logon for Remote Administrative Access (Pass-the-Hash)",
+            "Instruction": "A successful network logon (`logon_type`: 3) using NTLM authentication (`auth_type`: \"NTLM\") by an administrative account to a remote system. Kerberos is expected for legitimate domain admin activity; NTLM usage can suggest a Pass-the-Hash attack.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_computer: List",
+              "logon_type: List",
+              "auth_type: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "Lateral Movement via Remote Interactive Logon",
+            "Instruction": "A user account logging on to multiple workstations or servers via Remote Desktop (`logon_type`: 10) in rapid succession. This is highly indicative of an attacker exploring the network.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_computer: List",
+              "logon_type: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Logon with Explicit Credentials by Unexpected Account",
+            "Instruction": "An event (ID 4648) showing that a user or process used the credentials of a *different* user to access a resource. This is common in \"runas\" scenarios but is suspicious when the source or target user is unexpected, often indicating lateral movement.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_users: List",
+              "source_computer: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "First-time Logon from a User to a Critical Server",
+            "Instruction": "A user account that has never logged into a specific critical asset (like a domain controller or database server) before suddenly authenticates successfully.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_computer: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "Service Account Interactive Logon",
+            "Instruction": "A service account, which should only perform automated tasks and network logons (`logon_type`: 5 or 3), performs an interactive logon (`logon_type`: 2) or remote interactive logon (`logon_type`: 10). This is highly anomalous and suggests account compromise.",
+            "identifiable_fields": [
+              "source_users: List",
+              "logon_type: List"
+            ]
+          }
+        ],
+        "anomalous": [
+          {
+            "pattern_name": "Multiple Users Logged into a Single Workstation",
+            "Instruction": "Multiple distinct user accounts are concurrently logged onto a standard end-user workstation within a short time window. This is abnormal for typical user behavior.",
+            "identifiable_fields": [
+              "destination_computer: List",
+              "source_users: List",
+              "times: List",
+              "orientations: List"
+            ]
+          },
+          {
+            "pattern_name": "Same User Logged into Multiple Hosts Simultaneously",
+            "Instruction": "A single user account shows active logon sessions on a large number of different computers simultaneously. While some roaming is normal, a widespread pattern can indicate credential abuse.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_computer: List",
+              "times: List",
+              "orientations: List"
+            ]
+          },
+          {
+            "pattern_name": "Authentication from Non-Standard Hostname",
+            "Instruction": "Authentication attempts originating from a `source_computer` with a hostname that does not conform to the organization's standard naming convention.",
+            "identifiable_fields": [
+              "source_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Sudden Spike in Kerberos Ticket Requests",
+            "Instruction": "A sudden, anomalous increase in Kerberos ticket requests (Event ID 4768/4769), especially from a single host, which could indicate reconnaissance or a Kerberoasting attack.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "auth_type: List",
+              "times: List"
+            ]
+          }
+        ],
+        "vulnerable": [
+          {
+            "pattern_name": "Use of Weak Kerberos Encryption (RC4/DES)",
+            "Instruction": "Authentication events show the use of weak or deprecated Kerberos encryption types like RC4 or DES. This makes credentials susceptible to offline cracking and is a significant hygiene issue.",
+            "identifiable_fields": [
+              "auth_type: List"
+            ]
+          },
+          {
+            "pattern_name": "Excessive NTLMv1 Authentication",
+            "Instruction": "The continued use of the outdated and insecure NTLMv1 protocol. NTLMv1 is highly vulnerable to relay and cracking attacks and should be disabled.",
+            "identifiable_fields": [
+              "auth_type: List"
+            ]
+          },
+          {
+            "pattern_name": "Accounts with No Pre-Authentication Required",
+            "Instruction": "Kerberos pre-authentication is a security feature that helps prevent offline password cracking. An authentication attempt for an account where this is disabled is a vulnerability. This is often detected via Kerberos event logs (4768).",
+            "identifiable_fields": []
+          },
+          {
+            "pattern_name": "Cleartext Password Submission over Network",
+            "Instruction": "Some configurations might allow passwords to be sent in cleartext, which would be logged in certain events (e.g., if WDigest is enabled). This is a critical vulnerability.",
+            "identifiable_fields": []
+          },
+          {
+            "pattern_name": "Privileged Account Logon to a Workstation",
+            "Instruction": "A domain administrator or other highly privileged account (`source_users`) logs on to a standard user workstation (`destination_computer`). This increases the risk of credential theft via LSASS dumping.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_computer: List",
+              "logon_type: List"
+            ]
+          },
+          {
+            "pattern_name": "Authentication from a Device with Known Vulnerabilities",
+            "Instruction": "A successful authentication from a `source_computer` that is known to be unpatched or have critical vulnerabilities. This indicates a high-risk entry point.",
+            "identifiable_fields": [
+              "source_computer: List"
+            ]
+          }
+        ]
+      },
+      "temporal_patterns": {
+        "anomalous": [
+          {
+            "pattern_name": "Impossible Travel",
+            "Instruction": "A single user account successfully authenticates from two geographically distant `source_computer` locations in a time frame that would be impossible to travel between.",
+            "identifiable_fields": [
+              "source_users: List",
+              "source_computer: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Off-Hours Authentication",
+            "Instruction": "A user account authenticates at unusual times, such as late at night or on weekends, contrary to their established baseline of activity.",
+            "identifiable_fields": [
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Excessive Logoff/Logon Activity",
+            "Instruction": "An abnormally high frequency of logon and logoff events (`orientations`) for a single user or on a single machine, which could indicate scripted activity or an unstable connection being exploited.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_computer: List",
+              "orientations: List",
+              "times: List"
+            ]
+          }
+        ]
+      }
+    },
+    "entity_analysis_instructions": {
+      "source_profiling_queries": [
+        {
+          "query_name": "Identify Malicious and Anomalous Source Entities",
+          "instruction": "From the raw logs, extract and list all `source_computer` and `source_users` that are directly involved in the following patterns: 'High Volume of Failed Logons (Brute Force)', 'Successful Logon After Multiple Failures', 'NTLM Logon for Remote Administrative Access (Pass-the-Hash)', 'Service Account Interactive Logon', 'Authentication from Non-Standard Hostname', and 'Impossible Travel'."
+        }
+      ],
+      "target_profiling_queries": [
+        {
+          "query_name": "Identify High-Value or Frequently Targeted Systems",
+          "instruction": "From the raw logs, extract and list all `destination_computer` and `destination_users` that are involved in patterns like 'Privileged Account Logon to a Workstation', 'First-time Logon from a User to a Critical Server', or appear as a target in a high number of 'High Volume of Failed Logons (Brute Force)' events."
+        }
+      ]
+    },
+    "detection_rule_checklist": [
+      {
+        "detection_name": "Potential Brute-Force or Password Spraying Attack",
+        "mapped_ttp": "T1110 (Brute Force)",
+        "threat_scenario": "An attacker is attempting to guess user credentials through brute force (many passwords for one user) or password spraying (one password for many users).",
+        "detection_logic": "Alert when a single `source_computer` generates more than 20 failed logon events (`statuses`: \"Failure\") within a 5-minute window. Group by `source_computer`. A lower threshold (e.g., 5 failures) targeting more than 50 distinct `destination_users` can specifically detect password spraying.",
+        "detection_probability": 0.8,
+        "Details_reasoning_with_fields": "This detection has a high probability of success by correlating a high count of failures from a single origin. The key fields are `source_computer` to identify the origin of the attack, `statuses` to count the 'Failure' events, `destination_users` to differentiate between brute-force and password spraying, and `times` to apply the time window for the correlation."
+      },
+      {
+        "detection_name": "Successful Logon Immediately Following Failed Attempts",
+        "mapped_ttp": "T1110 (Brute Force), T1078 (Valid Accounts)",
+        "threat_scenario": "An attacker successfully guesses a password after multiple attempts.",
+        "detection_logic": "Alert when a successful logon event (`statuses`: \"Success\") for a `destination_users` from a specific `source_computer` is preceded by 5 or more failed logon events for the same user from the same source within the last 15 minutes.",
+        "detection_probability": 0.9,
+        "Details_reasoning_with_fields": "This is a very strong indicator of a successful guess. The detection relies on tracking state over time. The key fields are `statuses` to find the 'Failure' to 'Success' transition, `destination_users` and `source_computer` to ensure the events are for the same session, and `times` to define the 15-minute correlation window."
+      },
+      {
+        "detection_name": "Potential Pass-the-Hash (PtH) Activity",
+        "mapped_ttp": "T1550.002 (Use Alternate Authentication Material: Pass the Hash)",
+        "threat_scenario": "An attacker is using a stolen NTLM hash to authenticate to a remote system, bypassing the need for a password.",
+        "detection_logic": "Alert on a successful network logon (`logon_type`: 3) that uses NTLM authentication (`auth_type`: \"NTLM\") for a privileged user account (`source_users`) to a `destination_computer` where that user has no prior interactive logon history.",
+        "detection_probability": 0.7,
+        "Details_reasoning_with_fields": "This detection identifies behavior that is highly anomalous for legitimate administrative activity. It is detected by combining multiple fields: `logon_type` must be '3' (Network), `auth_type` must be 'NTLM', `source_users` should be a member of a privileged group, and this activity must be cross-referenced with historical data to confirm the lack of prior interactive logons from that user to the `destination_computer`."
+      },
+      {
+        "detection_name": "Anomalous Remote Desktop (RDP) Logon",
+        "mapped_ttp": "T1021.001 (Remote Services: Remote Desktop Protocol), T1078 (Valid Accounts)",
+        "threat_scenario": "An attacker is moving laterally between hosts using RDP.",
+        "detection_logic": "Alert when a user account (`source_users`) initiates a remote interactive logon (`logon_type`: 10) to a `destination_computer` that is not on a pre-approved list of administrative jump boxes or servers for that user. Also, alert if a user logs into more than 5 distinct hosts via RDP within one hour.",
+        "detection_probability": 0.75,
+        "Details_reasoning_with_fields": "This rule detects lateral movement by identifying unusual RDP patterns. The detection relies on `logon_type` being '10' (RemoteInteractive), and then applying logic based on `source_users` and `destination_computer` against an allow-list or by using `times` to count the frequency of distinct `destination_computer` logons by the same `source_users`."
+      },
+      {
+        "detection_name": "Service Account Interactive Logon",
+        "mapped_ttp": "T1078 (Valid Accounts)",
+        "threat_scenario": "A service account has been compromised and is being used by an attacker for interactive access.",
+        "detection_logic": "Alert whenever an account known to be a service account (based on naming convention or group membership) generates a logon event with `logon_type` 2 (Interactive) or 10 (Remote Interactive).",
+        "detection_probability": 0.95,
+        "Details_reasoning_with_fields": "This is a high-fidelity alert as service accounts should never log on interactively. The detection requires identifying a `source_users` as a service account and checking if the `logon_type` is '2' or '10'. This is a very strong signal of compromise."
+      }
+    ],
+    "indicators_of_compromise": [
+      {
+        "indicator_category": "Suspicious Source Hostnames",
+        "Instruction": "Hostnames that do not conform to internal naming conventions, are randomly generated, or are known to be associated with malicious tools. This can indicate an unauthorized device on the network.",
+        "relevant_fields": [
+          "source_computer:"
+        ]
+      },
+      {
+        "indicator_category": "Known Malicious Source IP Addresses",
+        "Instruction": "Authentication attempts originating from IP addresses listed on threat intelligence feeds as being malicious, command-and-control (C2) servers, or Tor exit nodes.",
+        "relevant_fields": [
+          "source_computer:"
+        ]
+      },
+      {
+        "indicator_category": "Use of Common Hacking/Admin Tool Names as Usernames/Hostnames",
+        "Instruction": "Usernames or hostnames that match the names of common penetration testing or administration tools (e.g., \"mimikatz\", \"psexec\", \"kali\").",
+        "relevant_fields": [
+          "source_computer:",
+          "source_users:",
+          "destination_users:"
+        ]
+      }
+    ],
+    "attack_pattern_checks": [
+      {
+        "attack_pattern_name": "Brute Force (T1110)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Potential Brute-Force or Password Spraying Attack' or 'Successful Logon Immediately Following Failed Attempts' detection rules. As proof, provide the source and target entities and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Password Spraying (T1110.003)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Potential Brute-Force or Password Spraying Attack' detection rule, specifically the logic for one source attacking many destination users. As proof, provide the source computer and a list of targeted user accounts.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Pass the Hash (T1550.002)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Potential Pass-the-Hash (PtH) Activity' detection rule. As proof, provide the source computer, destination computer, user account, and the timestamp of the NTLM network logon.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Pass the Ticket (T1550.003)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe a Kerberos ticket being used from a source computer where the associated user has no recent interactive logon history, indicating the ticket was likely stolen and moved. As proof, list the source, destination, user, and time.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Kerberoasting (T1558.003)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe a 'Sudden Spike in Kerberos Ticket Requests' from a single host, especially for service accounts. As proof, provide the source host and the list of requested service principal names.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Remote Services: Remote Desktop Protocol (T1021.001)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Anomalous Remote Desktop (RDP) Logon' detection rule. As proof, describe the anomalous RDP activity, including the user and the multiple hosts they connected to.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Valid Accounts (T1078)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if any of the following detection rules are matched: 'Successful Logon Immediately Following Failed Attempts', 'Anomalous Remote Desktop (RDP) Logon', or 'Service Account Interactive Logon'. As proof, provide the details from the triggered detection.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "OS Credential Dumping: LSASS Memory (T1003.001)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe a successful logon from a user to a new destination computer shortly after suspicious process activity (like accessing lsass.exe) on the source computer. This requires correlation with process logs. As proof, show the logon event and reference the preceding suspicious process event.",
+        "evidence": []
+      }
+    ],
+    "vulnerability_checks": [
+      {
+        "vulnerability_id": "CVE-2024-20674",
+        "is_present": false,
+        "evidence_instruction": "For CVE-2024-20674, set `is_present` to `true` if you observe successful Kerberos authentication events that are preceded by Kerberos errors or anomalies, potentially indicating a machine-in-the-middle attack. As proof, describe the sequence of anomalous Kerberos events and associated entities.",
+        "evidence": []
+      },
+      {
+        "vulnerability_id": "CVE-2022-26931",
+        "is_present": false,
+        "evidence_instruction": "For CVE-2022-26931, set `is_present` to `true` if you observe a user account suddenly gaining higher privileges during certificate-based authentication. This may manifest as a logon event where the user's token has unexpected group memberships. As proof, detail the user and the anomalous privilege seen in the logon event.",
+        "evidence": []
+      },
+      {
+        "vulnerability_id": "NTLM Relay Vulnerabilities",
+        "is_present": false,
+        "evidence_instruction": "Set `is_present` to `true` if you observe a successful NTLM authentication to a server from a source that is not the user's actual machine, especially if the authentication is for a privileged service like SMB or HTTP. This often requires correlation with network traffic. As proof, show the NTLM logon and any evidence of it originating from a suspicious relay point.",
+        "evidence": []
+      }
+    ]
+  },
+  "raw_response": "```json\n{\n  \"Log_context\": {\n    \"log_type\": \"Windows Authentication Logs\",\n    \"log_description\": \"A critical data source for detecting and responding to a wide array of cyber threats. These logs are fundamental to security monitoring as they capture the core of user and system activity within a Windows environment: every logon, logoff, and authentication attempt. They are crucial for detecting lateral movement, credential dumping, Pass-the-Hash, brute-force attacks, and the abuse of legitimate administrative tools.\"\n  },\n  \"observations\": {\n    \"behavioral_patterns\": {\n      \"malicious\": [\n        {\n          \"pattern_name\": \"High Volume of Failed Logons (Brute Force)\",\n          \"Instruction\": \"A large number of failed logon attempts from a single source computer targeting one or more destination users in a short time frame. This is a classic indicator of a brute-force or password spraying attack.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"destination_users: List\",\n            \"statuses: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Successful Logon After Multiple Failures\",\n          \"Instruction\": \"A sequence of failed logon events (`statuses`: \\\"Failure\\\") followed immediately by a successful logon (`statuses`: \\\"Success\\\") for the same user. This can indicate a successful password guessing attempt.\",\n          \"identifiable_fields\": [\n            \"destination_users: List\",\n            \"source_computer: List\",\n            \"statuses: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"NTLM Logon for Remote Administrative Access (Pass-the-Hash)\",\n          \"Instruction\": \"A successful network logon (`logon_type`: 3) using NTLM authentication (`auth_type`: \\\"NTLM\\\") by an administrative account to a remote system. Kerberos is expected for legitimate domain admin activity; NTLM usage can suggest a Pass-the-Hash attack.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_computer: List\",\n            \"logon_type: List\",\n            \"auth_type: List\",\n            \"statuses: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Lateral Movement via Remote Interactive Logon\",\n          \"Instruction\": \"A user account logging on to multiple workstations or servers via Remote Desktop (`logon_type`: 10) in rapid succession. This is highly indicative of an attacker exploring the network.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_computer: List\",\n            \"logon_type: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Logon with Explicit Credentials by Unexpected Account\",\n          \"Instruction\": \"An event (ID 4648) showing that a user or process used the credentials of a *different* user to access a resource. This is common in \\\"runas\\\" scenarios but is suspicious when the source or target user is unexpected, often indicating lateral movement.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"source_computer: List\",\n            \"destination_computer: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"First-time Logon from a User to a Critical Server\",\n          \"Instruction\": \"A user account that has never logged into a specific critical asset (like a domain controller or database server) before suddenly authenticates successfully.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_computer: List\",\n            \"statuses: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Service Account Interactive Logon\",\n          \"Instruction\": \"A service account, which should only perform automated tasks and network logons (`logon_type`: 5 or 3), performs an interactive logon (`logon_type`: 2) or remote interactive logon (`logon_type`: 10). This is highly anomalous and suggests account compromise.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"logon_type: List\"\n          ]\n        }\n      ],\n      \"anomalous\": [\n        {\n          \"pattern_name\": \"Multiple Users Logged into a Single Workstation\",\n          \"Instruction\": \"Multiple distinct user accounts are concurrently logged onto a standard end-user workstation within a short time window. This is abnormal for typical user behavior.\",\n          \"identifiable_fields\": [\n            \"destination_computer: List\",\n            \"source_users: List\",\n            \"times: List\",\n            \"orientations: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Same User Logged into Multiple Hosts Simultaneously\",\n          \"Instruction\": \"A single user account shows active logon sessions on a large number of different computers simultaneously. While some roaming is normal, a widespread pattern can indicate credential abuse.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_computer: List\",\n            \"times: List\",\n            \"orientations: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Authentication from Non-Standard Hostname\",\n          \"Instruction\": \"Authentication attempts originating from a `source_computer` with a hostname that does not conform to the organization's standard naming convention.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Sudden Spike in Kerberos Ticket Requests\",\n          \"Instruction\": \"A sudden, anomalous increase in Kerberos ticket requests (Event ID 4768/4769), especially from a single host, which could indicate reconnaissance or a Kerberoasting attack.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"auth_type: List\",\n            \"times: List\"\n          ]\n        }\n      ],\n      \"vulnerable\": [\n        {\n          \"pattern_name\": \"Use of Weak Kerberos Encryption (RC4/DES)\",\n          \"Instruction\": \"Authentication events show the use of weak or deprecated Kerberos encryption types like RC4 or DES. This makes credentials susceptible to offline cracking and is a significant hygiene issue.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Excessive NTLMv1 Authentication\",\n          \"Instruction\": \"The continued use of the outdated and insecure NTLMv1 protocol. NTLMv1 is highly vulnerable to relay and cracking attacks and should be disabled.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Accounts with No Pre-Authentication Required\",\n          \"Instruction\": \"Kerberos pre-authentication is a security feature that helps prevent offline password cracking. An authentication attempt for an account where this is disabled is a vulnerability. This is often detected via Kerberos event logs (4768).\",\n          \"identifiable_fields\": []\n        },\n        {\n          \"pattern_name\": \"Cleartext Password Submission over Network\",\n          \"Instruction\": \"Some configurations might allow passwords to be sent in cleartext, which would be logged in certain events (e.g., if WDigest is enabled). This is a critical vulnerability.\",\n          \"identifiable_fields\": []\n        },\n        {\n          \"pattern_name\": \"Privileged Account Logon to a Workstation\",\n          \"Instruction\": \"A domain administrator or other highly privileged account (`source_users`) logs on to a standard user workstation (`destination_computer`). This increases the risk of credential theft via LSASS dumping.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_computer: List\",\n            \"logon_type: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Authentication from a Device with Known Vulnerabilities\",\n          \"Instruction\": \"A successful authentication from a `source_computer` that is known to be unpatched or have critical vulnerabilities. This indicates a high-risk entry point.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\"\n          ]\n        }\n      ]\n    },\n    \"temporal_patterns\": {\n      \"anomalous\": [\n        {\n          \"pattern_name\": \"Impossible Travel\",\n          \"Instruction\": \"A single user account successfully authenticates from two geographically distant `source_computer` locations in a time frame that would be impossible to travel between.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"source_computer: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Off-Hours Authentication\",\n          \"Instruction\": \"A user account authenticates at unusual times, such as late at night or on weekends, contrary to their established baseline of activity.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Excessive Logoff/Logon Activity\",\n          \"Instruction\": \"An abnormally high frequency of logon and logoff events (`orientations`) for a single user or on a single machine, which could indicate scripted activity or an unstable connection being exploited.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_computer: List\",\n            \"orientations: List\",\n            \"times: List\"\n          ]\n        }\n      ]\n    }\n  },\n  \"entity_analysis_instructions\": {\n    \"source_profiling_queries\": [\n      {\n        \"query_name\": \"Identify Malicious and Anomalous Source Entities\",\n        \"instruction\": \"From the raw logs, extract and list all `source_computer` and `source_users` that are directly involved in the following patterns: 'High Volume of Failed Logons (Brute Force)', 'Successful Logon After Multiple Failures', 'NTLM Logon for Remote Administrative Access (Pass-the-Hash)', 'Service Account Interactive Logon', 'Authentication from Non-Standard Hostname', and 'Impossible Travel'.\"\n      }\n    ],\n    \"target_profiling_queries\": [\n      {\n        \"query_name\": \"Identify High-Value or Frequently Targeted Systems\",\n        \"instruction\": \"From the raw logs, extract and list all `destination_computer` and `destination_users` that are involved in patterns like 'Privileged Account Logon to a Workstation', 'First-time Logon from a User to a Critical Server', or appear as a target in a high number of 'High Volume of Failed Logons (Brute Force)' events.\"\n      }\n    ]\n  },\n  \"detection_rule_checklist\": [\n    {\n      \"detection_name\": \"Potential Brute-Force or Password Spraying Attack\",\n      \"mapped_ttp\": \"T1110 (Brute Force)\",\n      \"threat_scenario\": \"An attacker is attempting to guess user credentials through brute force (many passwords for one user) or password spraying (one password for many users).\",\n      \"detection_logic\": \"Alert when a single `source_computer` generates more than 20 failed logon events (`statuses`: \\\"Failure\\\") within a 5-minute window. Group by `source_computer`. A lower threshold (e.g., 5 failures) targeting more than 50 distinct `destination_users` can specifically detect password spraying.\",\n      \"detection_probability\": 0.8,\n      \"Details_reasoning_with_fields\": \"This detection has a high probability of success by correlating a high count of failures from a single origin. The key fields are `source_computer` to identify the origin of the attack, `statuses` to count the 'Failure' events, `destination_users` to differentiate between brute-force and password spraying, and `times` to apply the time window for the correlation.\"\n    },\n    {\n      \"detection_name\": \"Successful Logon Immediately Following Failed Attempts\",\n      \"mapped_ttp\": \"T1110 (Brute Force), T1078 (Valid Accounts)\",\n      \"threat_scenario\": \"An attacker successfully guesses a password after multiple attempts.\",\n      \"detection_logic\": \"Alert when a successful logon event (`statuses`: \\\"Success\\\") for a `destination_users` from a specific `source_computer` is preceded by 5 or more failed logon events for the same user from the same source within the last 15 minutes.\",\n      \"detection_probability\": 0.9,\n      \"Details_reasoning_with_fields\": \"This is a very strong indicator of a successful guess. The detection relies on tracking state over time. The key fields are `statuses` to find the 'Failure' to 'Success' transition, `destination_users` and `source_computer` to ensure the events are for the same session, and `times` to define the 15-minute correlation window.\"\n    },\n    {\n      \"detection_name\": \"Potential Pass-the-Hash (PtH) Activity\",\n      \"mapped_ttp\": \"T1550.002 (Use Alternate Authentication Material: Pass the Hash)\",\n      \"threat_scenario\": \"An attacker is using a stolen NTLM hash to authenticate to a remote system, bypassing the need for a password.\",\n      \"detection_logic\": \"Alert on a successful network logon (`logon_type`: 3) that uses NTLM authentication (`auth_type`: \\\"NTLM\\\") for a privileged user account (`source_users`) to a `destination_computer` where that user has no prior interactive logon history.\",\n      \"detection_probability\": 0.7,\n      \"Details_reasoning_with_fields\": \"This detection identifies behavior that is highly anomalous for legitimate administrative activity. It is detected by combining multiple fields: `logon_type` must be '3' (Network), `auth_type` must be 'NTLM', `source_users` should be a member of a privileged group, and this activity must be cross-referenced with historical data to confirm the lack of prior interactive logons from that user to the `destination_computer`.\"\n    },\n    {\n      \"detection_name\": \"Anomalous Remote Desktop (RDP) Logon\",\n      \"mapped_ttp\": \"T1021.001 (Remote Services: Remote Desktop Protocol), T1078 (Valid Accounts)\",\n      \"threat_scenario\": \"An attacker is moving laterally between hosts using RDP.\",\n      \"detection_logic\": \"Alert when a user account (`source_users`) initiates a remote interactive logon (`logon_type`: 10) to a `destination_computer` that is not on a pre-approved list of administrative jump boxes or servers for that user. Also, alert if a user logs into more than 5 distinct hosts via RDP within one hour.\",\n      \"detection_probability\": 0.75,\n      \"Details_reasoning_with_fields\": \"This rule detects lateral movement by identifying unusual RDP patterns. The detection relies on `logon_type` being '10' (RemoteInteractive), and then applying logic based on `source_users` and `destination_computer` against an allow-list or by using `times` to count the frequency of distinct `destination_computer` logons by the same `source_users`.\"\n    },\n    {\n      \"detection_name\": \"Service Account Interactive Logon\",\n      \"mapped_ttp\": \"T1078 (Valid Accounts)\",\n      \"threat_scenario\": \"A service account has been compromised and is being used by an attacker for interactive access.\",\n      \"detection_logic\": \"Alert whenever an account known to be a service account (based on naming convention or group membership) generates a logon event with `logon_type` 2 (Interactive) or 10 (Remote Interactive).\",\n      \"detection_probability\": 0.95,\n      \"Details_reasoning_with_fields\": \"This is a high-fidelity alert as service accounts should never log on interactively. The detection requires identifying a `source_users` as a service account and checking if the `logon_type` is '2' or '10'. This is a very strong signal of compromise.\"\n    }\n  ],\n  \"indicators_of_compromise\": [\n    {\n      \"indicator_category\": \"Suspicious Source Hostnames\",\n      \"Instruction\": \"Hostnames that do not conform to internal naming conventions, are randomly generated, or are known to be associated with malicious tools. This can indicate an unauthorized device on the network.\",\n      \"relevant_fields\": [\n        \"source_computer:\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Known Malicious Source IP Addresses\",\n      \"Instruction\": \"Authentication attempts originating from IP addresses listed on threat intelligence feeds as being malicious, command-and-control (C2) servers, or Tor exit nodes.\",\n      \"relevant_fields\": [\n        \"source_computer:\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Use of Common Hacking/Admin Tool Names as Usernames/Hostnames\",\n      \"Instruction\": \"Usernames or hostnames that match the names of common penetration testing or administration tools (e.g., \\\"mimikatz\\\", \\\"psexec\\\", \\\"kali\\\").\",\n      \"relevant_fields\": [\n        \"source_computer:\",\n        \"source_users:\",\n        \"destination_users:\"\n      ]\n    }\n  ],\n  \"attack_pattern_checks\": [\n    {\n      \"attack_pattern_name\": \"Brute Force (T1110)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Potential Brute-Force or Password Spraying Attack' or 'Successful Logon Immediately Following Failed Attempts' detection rules. As proof, provide the source and target entities and the relevant timestamps.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Password Spraying (T1110.003)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Potential Brute-Force or Password Spraying Attack' detection rule, specifically the logic for one source attacking many destination users. As proof, provide the source computer and a list of targeted user accounts.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Pass the Hash (T1550.002)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Potential Pass-the-Hash (PtH) Activity' detection rule. As proof, provide the source computer, destination computer, user account, and the timestamp of the NTLM network logon.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Pass the Ticket (T1550.003)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe a Kerberos ticket being used from a source computer where the associated user has no recent interactive logon history, indicating the ticket was likely stolen and moved. As proof, list the source, destination, user, and time.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Kerberoasting (T1558.003)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe a 'Sudden Spike in Kerberos Ticket Requests' from a single host, especially for service accounts. As proof, provide the source host and the list of requested service principal names.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Remote Services: Remote Desktop Protocol (T1021.001)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Anomalous Remote Desktop (RDP) Logon' detection rule. As proof, describe the anomalous RDP activity, including the user and the multiple hosts they connected to.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Valid Accounts (T1078)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if any of the following detection rules are matched: 'Successful Logon Immediately Following Failed Attempts', 'Anomalous Remote Desktop (RDP) Logon', or 'Service Account Interactive Logon'. As proof, provide the details from the triggered detection.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"OS Credential Dumping: LSASS Memory (T1003.001)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe a successful logon from a user to a new destination computer shortly after suspicious process activity (like accessing lsass.exe) on the source computer. This requires correlation with process logs. As proof, show the logon event and reference the preceding suspicious process event.\",\n      \"evidence\": []\n    }\n  ],\n  \"vulnerability_checks\": [\n    {\n      \"vulnerability_id\": \"CVE-2024-20674\",\n      \"is_present\": false,\n      \"evidence_instruction\": \"For CVE-2024-20674, set `is_present` to `true` if you observe successful Kerberos authentication events that are preceded by Kerberos errors or anomalies, potentially indicating a machine-in-the-middle attack. As proof, describe the sequence of anomalous Kerberos events and associated entities.\",\n      \"evidence\": []\n    },\n    {\n      \"vulnerability_id\": \"CVE-2022-26931\",\n      \"is_present\": false,\n      \"evidence_instruction\": \"For CVE-2022-26931, set `is_present` to `true` if you observe a user account suddenly gaining higher privileges during certificate-based authentication. This may manifest as a logon event where the user's token has unexpected group memberships. As proof, detail the user and the anomalous privilege seen in the logon event.\",\n      \"evidence\": []\n    },\n    {\n      \"vulnerability_id\": \"NTLM Relay Vulnerabilities\",\n      \"is_present\": false,\n      \"evidence_instruction\": \"Set `is_present` to `true` if you observe a successful NTLM authentication to a server from a source that is not the user's actual machine, especially if the authentication is for a privileged service like SMB or HTTP. This often requires correlation with network traffic. As proof, show the NTLM logon and any evidence of it originating from a suspicious relay point.\",\n      \"evidence\": []\n    }\n  ]\n}\n```",
+  "model": "gemini-2.5-pro",
+  "provider": "gemini",
+  "report_source": "gemini"
+}

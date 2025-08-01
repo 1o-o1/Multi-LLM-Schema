@@ -1,0 +1,426 @@
+{
+  "parsed_json": {
+    "Log_context": {
+      "log_type": "Windows Authentication Log",
+      "log_description": "Windows Authentication Logs are a critical data source for detecting advanced persistent threats, lateral movement, and credential-based attacks. They provide visibility into authentication patterns, enabling the detection of techniques like pass-the-hash, credential dumping, privilege escalation, and lateral movement. The analyzed fields form a comprehensive framework for identifying malicious activity."
+    },
+    "observations": {
+      "behavioral_patterns": {
+        "malicious": [
+          {
+            "pattern_name": "Rapid Cross-System Authentication",
+            "Instruction": "Authentication events over the network from rare or unusual hosts or users using EventCode 4624 with LogonType 3 (network connection) occurring within short time windows across multiple systems.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "destination_computer: List",
+              "times: List",
+              "source_users: List",
+              "destination_users: List",
+              "logon_type: List"
+            ]
+          },
+          {
+            "pattern_name": "Pass-the-Hash Authentication Anomalies",
+            "Instruction": "Attackers leverage hashed credentials (NTLM hashes) or Kerberos tickets to authenticate on other systems without needing the plaintext passwords. These techniques are commonly used to escalate privileges and move laterally between high-value systems.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "destination_users: List",
+              "source_computer: List",
+              "destination_computer: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "Privilege Escalation Authentication Chains",
+            "Instruction": "Sequential authentication events showing escalation from standard user to administrative accounts across systems.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_users: List",
+              "times: List",
+              "orientations: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "Credential Stuffing Attack Signatures",
+            "Instruction": "Malicious actors routinely use the NTLM authentication protocol to carry out account enumeration and brute force-styled attacks to compromise accounts within a victim's network. Once inside, an attacker can gain persistence, exfiltrate sensitive data, and unleash ransomware.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_users: List",
+              "statuses: List",
+              "times: List",
+              "auth_type: List"
+            ]
+          },
+          {
+            "pattern_name": "Service Account Abuse",
+            "Instruction": "Legitimate service accounts being used for interactive logons or accessing resources outside their normal scope.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_users: List",
+              "logon_type: List",
+              "destination_computer: List"
+            ]
+          }
+        ],
+        "anomalous": [
+          {
+            "pattern_name": "Off-Hours Authentication Activity",
+            "Instruction": "User anomaly refers to the exercise of finding rare login pattern. Each device has a steady pattern of login as most of the IT operations are repetitive and so their login pattern is quite straight forward.",
+            "identifiable_fields": [
+              "times: List",
+              "source_users: List",
+              "destination_users: List",
+              "source_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Geographical Authentication Inconsistencies",
+            "Instruction": "Authentication attempts from locations inconsistent with user's typical access patterns.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "times: List",
+              "source_users: List",
+              "destination_users: List"
+            ]
+          },
+          {
+            "pattern_name": "Authentication Protocol Deviations",
+            "Instruction": "Users suddenly switching from typical Kerberos to NTLM authentication or other protocol changes.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_users: List",
+              "destination_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Logon Type Anomalies",
+            "Instruction": "Users performing logon types inconsistent with their role (e.g., service logons from interactive users).",
+            "identifiable_fields": [
+              "logon_type: List",
+              "source_users: List",
+              "destination_users: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Authentication Frequency Spikes",
+            "Instruction": "Sudden increases in authentication frequency from specific users or to specific systems.",
+            "identifiable_fields": [
+              "times: List",
+              "source_users: List",
+              "destination_users: List",
+              "source_computer: List",
+              "destination_computer: List"
+            ]
+          }
+        ],
+        "vulnerable": [
+          {
+            "pattern_name": "Weak Authentication Protocol Usage",
+            "Instruction": "Despite being replaced by more secure authentication protocols and having multiple known vulnerabilities, NTLM is still widely deployed today because of its compatibility with legacy systems and applications.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_computer: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Shared Account Usage",
+            "Instruction": "Multiple simultaneous sessions from the same account across different systems.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_users: List",
+              "times: List",
+              "source_computer: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Stale Authentication Sessions",
+            "Instruction": "Long-running authentication sessions without re-authentication, indicating potential session hijacking vulnerability.",
+            "identifiable_fields": [
+              "times: List",
+              "orientations: List",
+              "source_users: List",
+              "destination_users: List"
+            ]
+          },
+          {
+            "pattern_name": "Administrative Account Overuse",
+            "Instruction": "Administrative accounts being used for routine tasks instead of standard user accounts.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_users: List",
+              "logon_type: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Legacy System Authentication",
+            "Instruction": "Authentication to systems running outdated software or protocols vulnerable to exploitation.",
+            "identifiable_fields": [
+              "destination_computer: List",
+              "auth_type: List",
+              "source_users: List",
+              "destination_users: List"
+            ]
+          }
+        ]
+      },
+      "temporal_patterns": {
+        "malicious": [
+          {
+            "pattern_name": "Rapid Cross-System Authentication",
+            "Instruction": "Authentication events over the network from rare or unusual hosts or users using EventCode 4624 with LogonType 3 (network connection) occurring within short time windows across multiple systems.",
+            "identifiable_fields": [
+              "times: List",
+              "source_computer: List",
+              "destination_computer: List"
+            ]
+          }
+        ],
+        "anomalous": [
+          {
+            "pattern_name": "Off-Hours Authentication Activity",
+            "Instruction": "User anomaly refers to the exercise of finding rare login pattern. Each device has a steady pattern of login as most of the IT operations are repetitive and so their login pattern is quite straight forward.",
+            "identifiable_fields": [
+              "times: List",
+              "source_users: List"
+            ]
+          },
+          {
+            "pattern_name": "Authentication Frequency Spikes",
+            "Instruction": "Sudden increases in authentication frequency from specific users or to specific systems.",
+            "identifiable_fields": [
+              "times: List",
+              "source_users: List",
+              "destination_users: List"
+            ]
+          }
+        ],
+        "vulnerable": [
+          {
+            "pattern_name": "Stale Authentication Sessions",
+            "Instruction": "Long-running authentication sessions without re-authentication, indicating potential session hijacking vulnerability.",
+            "identifiable_fields": [
+              "times: List",
+              "orientations: List"
+            ]
+          }
+        ]
+      }
+    },
+    "entity_analysis_instructions": {
+      "source_profiling_queries": [
+        {
+          "query_name": "Identify Malicious and Anomalous Source Entities",
+          "instruction": "From the raw logs, extract and list all 'source_computer' and 'source_users' that are directly involved in the following patterns: 'Rapid Cross-System Authentication', 'Pass-the-Hash Authentication Anomalies', 'Credential Stuffing Attack Signatures', 'Service Account Abuse', 'Off-Hours Authentication Activity', 'Geographical Authentication Inconsistencies', 'Authentication Protocol Deviations', 'Authentication Frequency Spikes'."
+        }
+      ],
+      "target_profiling_queries": [
+        {
+          "query_name": "Identify High-Value or Frequently Targeted Systems",
+          "instruction": "From the raw logs, extract and list all 'destination_computer' and 'destination_users' that are involved in patterns like 'Privilege Escalation Authentication Chains', 'Service Account Abuse', 'Legacy System Authentication' or appear as a target in multiple anomalous events."
+        }
+      ]
+    },
+    "detection_rule_checklist": [
+      {
+        "detection_name": "Lateral Movement via Authentication Events",
+        "mapped_ttp": "T1021 (Remote Services), TA0008 (Lateral Movement)",
+        "threat_scenario": "Initial search using Windows security logs, looking for authentication events over the network from rare or unusual hosts or users.",
+        "detection_logic": "- Monitor `source_computer` and `destination_computer` for authentication chains\n- Analyze `times` for rapid sequential authentications (< 5 minutes between systems)\n- Filter `logon_type` = 3 (Network) and `statuses` = \"Success\"\n- Cross-reference `source_users` and `destination_users` for privilege escalation patterns",
+        "detection_probability": 0.0,
+        "Details_reasoning_with_fields": "To detect this, you must analyze relationships between multiple log entries. Correlate successful network logons (logon_type: 3, statuses: Success) across different systems. A key indicator is seeing the same source_users authenticating to multiple destination_computer values in a short time window (times). The link between source_computer and destination_computer forms the lateral movement path."
+      },
+      {
+        "detection_name": "Credential Dumping Detection",
+        "mapped_ttp": "T1003 (OS Credential Dumping), T1078 (Valid Accounts)",
+        "threat_scenario": "Credential dumping via Mimikatz is a technique used by attackers to extract sensitive authentication data. Attackers can use various methods to dump credentials such as exploiting vulnerabilities, keylogging, sniffing network traffic, or using tools like Mimikatz.",
+        "detection_logic": "- Monitor for unusual `auth_type` changes (Kerberos to NTLM)\n- Detect multiple failed authentications followed by successful ones\n- Analyze `source_users` for service accounts performing interactive logons\n- Track `destination_computer` access to domain controllers",
+        "detection_probability": 0.0,
+        "Details_reasoning_with_fields": "This detection relies on behavioral anomalies. Look for a user (source_users) suddenly switching protocols (auth_type from Kerberos to NTLM), which can be a sign of a downgrade attack. Also, a spike in failed logins (statuses: Failure) followed by a success for the same source_users can indicate brute-forcing or password spraying. Pay special attention if the destination_computer is a domain controller, a primary target for credential harvesting."
+      },
+      {
+        "detection_name": "Authentication Anomaly Detection",
+        "mapped_ttp": "T1078 (Valid Accounts), TA0008 (Lateral Movement)",
+        "threat_scenario": "Characterize an anomalous Windows authentication event through statistical rarity assessment.",
+        "detection_logic": "- Establish baseline authentication patterns using `times`, `source_computer`, `destination_computer`\n- Calculate rarity scores for authentication combinations\n- Flag deviations in `logon_type`, `auth_type`, and user behavior\n- Monitor `orientations` for unusual logoff patterns",
+        "detection_probability": 0.0,
+        "Details_reasoning_with_fields": "This is a broad, baseline-dependent rule. The core task is to identify statistically rare events. This involves analyzing combinations of nearly all fields. For example, a user (source_users) logging in from an unusual source_computer at an abnormal time (times) with a logon_type they don't typically use would be a high-rarity event. Unusual logoff events (orientations) can also indicate a crashed or hijacked session."
+      }
+    ],
+    "indicators_of_compromise": [
+      {
+        "indicator_category": "Authentication Failure Patterns",
+        "Instruction": "The most common and noisy indicators within event logs for lateral movement attempts are failed logins; the most common event IDs for this are 529 & 4625. Each method of lateral movement has its own set of associated event IDs. For example, attempts to login to accounts via SMB will generate event IDs 552 or 4648 (logon attempt using explicit credentials), and PsExec will show 601 or 4697 (service was installed in the system).",
+        "relevant_fields": [
+          "statuses: List",
+          "source_users: List",
+          "destination_users: List",
+          "destination_computer: List"
+        ]
+      },
+      {
+        "indicator_category": "Credential Dumping Artifacts",
+        "Instruction": "LSASS credential dumping was first observed in the tactics, techniques, and procedures (TTPs) of several sophisticated threat activity groups—including actors that Microsoft tracks as HAFNIUM and GALLIUM. Detecting and stopping OS credential theft is therefore important because it can spell the difference between compromising or encrypting one device versus an entire network.",
+        "relevant_fields": [
+          "source_users: List",
+          "destination_users: List",
+          "auth_type: List",
+          "logon_type: List"
+        ]
+      },
+      {
+        "indicator_category": "Lateral Movement Indicators",
+        "Instruction": "Based on searches, administrators connected over the network from specific IP addresses and gained command line access to victim hosts. Using psexec for lateral movement has been around for quite a while and is still very popular and relevant.",
+        "relevant_fields": [
+          "source_computer: List",
+          "destination_computer: List",
+          "source_users: List",
+          "logon_type: List"
+        ]
+      },
+      {
+        "indicator_category": "Account Enumeration Signatures",
+        "Instruction": "Account enumeration is a more specific type of brute force attack where the attacker is attempting to guess the valid usernames of users within a network. These attacks are typically done when the malicious actor has limited information about their victim's network.",
+        "relevant_fields": [
+          "source_users: List",
+          "destination_users: List",
+          "statuses: List",
+          "source_computer: List"
+        ]
+      }
+    ],
+    "attack_pattern_checks": [
+      {
+        "attack_pattern_name": "Dictionary-based Password Attack (CAPEC-16)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Credential Dumping Detection' or 'Authentication Anomaly Detection' rules, specifically a high volume of failed logons from a single source against multiple users. As proof, provide the source entity, a sample of target users, and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Password Brute Forcing (CAPEC-49)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence of a high volume of failed logons against a single user account from one or more sources, matching the 'Credential Dumping Detection' rule. As proof, provide the source(s), the target user, and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Password Recovery Exploitation (CAPEC-50)",
+        "is_present": false,
+        "evidence_Instruction": "This is difficult to detect with authentication logs alone. Set `is_present` to `true` only if you observe a suspicious successful logon immediately following activity related to password reset systems, if such context is available. Evidence should describe this correlation.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Rainbow Table Password Cracking (CAPEC-55)",
+        "is_present": false,
+        "evidence_Instruction": "This is an offline attack and not directly visible in authentication logs. Do not set to true unless there is external intelligence suggesting this. You may see the result as a 'Valid Accounts' authentication.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Try Common or Default Usernames and Passwords (CAPEC-70)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe failed logon attempts for common usernames like 'admin', 'administrator', 'guest', etc. from an external or unusual source. As proof, list the attempted usernames and the source computer.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Brute Force (CAPEC-112)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Credential Dumping Detection' rule involving a high number of failed logons followed by a success. As proof, provide the source and target entities and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Identity Spoofing (CAPEC-151)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe a user account logging in from a system or location that is highly anomalous for that user, especially if it coincides with other suspicious activity. As proof, describe the anomaly (e.g., user X logged in from server Y for the first time).",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Protocol Manipulation (CAPEC-192)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe evidence of an 'Authentication Protocol Deviation' pattern, such as a sudden switch from Kerberos to NTLM. As proof, provide the user, source, destination, and the protocol change observed.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Abuse of Functionality (CAPEC-210)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe the 'Service Account Abuse' pattern where a non-interactive account is used for an interactive logon. As proof, provide the service account name, the logon type, and the systems involved.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Cross-Site Scripting via Encoded URI Schemes (CAPEC-244)",
+        "is_present": false,
+        "evidence_Instruction": "This is not typically detectable via Windows Authentication logs. Do not set to true.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Kerberoasting (CAPEC-509)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe a standard user account requesting a high number of Kerberos service tickets (TGS-REQ) for various services, especially if this is anomalous for the user. This may require deeper Kerberos event logging. As proof, list the user and the services for which tickets were requested.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Use of Known Domain Credentials (CAPEC-560)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if any of the 'Authentication Anomaly Detection' rules trigger, such as off-hours or geographically inconsistent logons. This pattern represents the outcome of a credential compromise. As proof, provide the details of the anomalous successful logon.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Windows Admin Shares with Stolen Credentials (CAPEC-561)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe the 'Lateral Movement via Authentication Events' detection rule triggering, specifically with a network logon (LogonType 3) to a high-value server or another workstation. As proof, provide the source/destination computers and the user account.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Password Spraying (CAPEC-565)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe a single source attempting to log in to many different user accounts with a small number of passwords (indicated by a large number of logon failures across many accounts from one source). As proof, provide the source computer and a list of targeted accounts.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Credential Stuffing (CAPEC-600)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe a high volume of failed logons from one or more sources across many different accounts, often followed by a few successes. This matches the 'Credential Stuffing Attack Signatures' pattern. As proof, provide the source(s) and the accounts involved.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Use of Captured Hashes (Pass The Hash) (CAPEC-645)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe the 'Pass-the-Hash Authentication Anomalies' pattern, such as a logon using NTLM where Kerberos is expected, especially for privileged accounts or to sensitive systems. As proof, detail the event, including the user, systems, and authentication protocol.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Use of Known Kerberos Credentials (CAPEC-652)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe lateral movement using Kerberos that is anomalous (e.g., user logging into a system they don't normally access). This can be identified by the 'Lateral Movement via Authentication Events' rule where the auth_type is Kerberos. As proof, provide the details of the anomalous successful Kerberos logon.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "Use of Known Operating System Credentials (CAPEC-653)",
+        "is_present": false,
+        "evidence_Instruction": "This is a general pattern. Set `is_present` to `true` if any of the primary detection rules ('Lateral Movement', 'Credential Dumping', 'Authentication Anomaly') are triggered with a successful logon. As proof, cite the rule that was triggered and the associated entities.",
+        "evidence": []
+      }
+    ],
+    "vulnerability_checks": [
+      {
+        "vulnerability_id": "CVE-2024-38030",
+        "is_present": false,
+        "evidence_instruction": "For CVE-2024-38030, set `is_present` to `true` if you observe an authentication coercion attack where a device is forced to send NTLM hashes to an attacker's system. This may manifest as an unexpected NTLM authentication attempt from a vulnerable system to an unknown or untrusted destination. As proof, describe the source of the coerced authentication and the destination it attempted to connect to.",
+        "evidence": []
+      },
+      {
+        "vulnerability_id": "CVE-2019-1040",
+        "is_present": false,
+        "evidence_instruction": "For CVE-2019-1040, set `is_present` to `true` if you observe an NTLM authentication bypass, which could appear as a successful NTLM logon where it should have failed or been blocked. This is hard to spot; look for successful NTLM logons to services that should be protected against such bypasses, especially if the source is unusual. As proof, detail the suspicious successful NTLM authentication.",
+        "evidence": []
+      }
+    ]
+  },
+  "raw_response": "```json\n{\n  \"Log_context\": {\n    \"log_type\": \"Windows Authentication Log\",\n    \"log_description\": \"Windows Authentication Logs are a critical data source for detecting advanced persistent threats, lateral movement, and credential-based attacks. They provide visibility into authentication patterns, enabling the detection of techniques like pass-the-hash, credential dumping, privilege escalation, and lateral movement. The analyzed fields form a comprehensive framework for identifying malicious activity.\"\n  },\n  \"observations\": {\n    \"behavioral_patterns\": {\n      \"malicious\": [\n        {\n          \"pattern_name\": \"Rapid Cross-System Authentication\",\n          \"Instruction\": \"Authentication events over the network from rare or unusual hosts or users using EventCode 4624 with LogonType 3 (network connection) occurring within short time windows across multiple systems.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"destination_computer: List\",\n            \"times: List\",\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"logon_type: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Pass-the-Hash Authentication Anomalies\",\n          \"Instruction\": \"Attackers leverage hashed credentials (NTLM hashes) or Kerberos tickets to authenticate on other systems without needing the plaintext passwords. These techniques are commonly used to escalate privileges and move laterally between high-value systems.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"destination_users: List\",\n            \"source_computer: List\",\n            \"destination_computer: List\",\n            \"statuses: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Privilege Escalation Authentication Chains\",\n          \"Instruction\": \"Sequential authentication events showing escalation from standard user to administrative accounts across systems.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"times: List\",\n            \"orientations: List\",\n            \"statuses: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Credential Stuffing Attack Signatures\",\n          \"Instruction\": \"Malicious actors routinely use the NTLM authentication protocol to carry out account enumeration and brute force-styled attacks to compromise accounts within a victim's network. Once inside, an attacker can gain persistence, exfiltrate sensitive data, and unleash ransomware.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"statuses: List\",\n            \"times: List\",\n            \"auth_type: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Service Account Abuse\",\n          \"Instruction\": \"Legitimate service accounts being used for interactive logons or accessing resources outside their normal scope.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"logon_type: List\",\n            \"destination_computer: List\"\n          ]\n        }\n      ],\n      \"anomalous\": [\n        {\n          \"pattern_name\": \"Off-Hours Authentication Activity\",\n          \"Instruction\": \"User anomaly refers to the exercise of finding rare login pattern. Each device has a steady pattern of login as most of the IT operations are repetitive and so their login pattern is quite straight forward.\",\n          \"identifiable_fields\": [\n            \"times: List\",\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"source_computer: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Geographical Authentication Inconsistencies\",\n          \"Instruction\": \"Authentication attempts from locations inconsistent with user's typical access patterns.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"times: List\",\n            \"source_users: List\",\n            \"destination_users: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Authentication Protocol Deviations\",\n          \"Instruction\": \"Users suddenly switching from typical Kerberos to NTLM authentication or other protocol changes.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Logon Type Anomalies\",\n          \"Instruction\": \"Users performing logon types inconsistent with their role (e.g., service logons from interactive users).\",\n          \"identifiable_fields\": [\n            \"logon_type: List\",\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"destination_computer: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Authentication Frequency Spikes\",\n          \"Instruction\": \"Sudden increases in authentication frequency from specific users or to specific systems.\",\n          \"identifiable_fields\": [\n            \"times: List\",\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"source_computer: List\",\n            \"destination_computer: List\"\n          ]\n        }\n      ],\n      \"vulnerable\": [\n        {\n          \"pattern_name\": \"Weak Authentication Protocol Usage\",\n          \"Instruction\": \"Despite being replaced by more secure authentication protocols and having multiple known vulnerabilities, NTLM is still widely deployed today because of its compatibility with legacy systems and applications.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"source_computer: List\",\n            \"destination_computer: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Shared Account Usage\",\n          \"Instruction\": \"Multiple simultaneous sessions from the same account across different systems.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"times: List\",\n            \"source_computer: List\",\n            \"destination_computer: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Stale Authentication Sessions\",\n          \"Instruction\": \"Long-running authentication sessions without re-authentication, indicating potential session hijacking vulnerability.\",\n          \"identifiable_fields\": [\n            \"times: List\",\n            \"orientations: List\",\n            \"source_users: List\",\n            \"destination_users: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Administrative Account Overuse\",\n          \"Instruction\": \"Administrative accounts being used for routine tasks instead of standard user accounts.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"destination_users: List\",\n            \"logon_type: List\",\n            \"destination_computer: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Legacy System Authentication\",\n          \"Instruction\": \"Authentication to systems running outdated software or protocols vulnerable to exploitation.\",\n          \"identifiable_fields\": [\n            \"destination_computer: List\",\n            \"auth_type: List\",\n            \"source_users: List\",\n            \"destination_users: List\"\n          ]\n        }\n      ]\n    },\n    \"temporal_patterns\": {\n      \"malicious\": [\n        {\n          \"pattern_name\": \"Rapid Cross-System Authentication\",\n          \"Instruction\": \"Authentication events over the network from rare or unusual hosts or users using EventCode 4624 with LogonType 3 (network connection) occurring within short time windows across multiple systems.\",\n          \"identifiable_fields\": [\n            \"times: List\",\n            \"source_computer: List\",\n            \"destination_computer: List\"\n          ]\n        }\n      ],\n      \"anomalous\": [\n        {\n          \"pattern_name\": \"Off-Hours Authentication Activity\",\n          \"Instruction\": \"User anomaly refers to the exercise of finding rare login pattern. Each device has a steady pattern of login as most of the IT operations are repetitive and so their login pattern is quite straight forward.\",\n          \"identifiable_fields\": [\n            \"times: List\",\n            \"source_users: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Authentication Frequency Spikes\",\n          \"Instruction\": \"Sudden increases in authentication frequency from specific users or to specific systems.\",\n          \"identifiable_fields\": [\n            \"times: List\",\n            \"source_users: List\",\n            \"destination_users: List\"\n          ]\n        }\n      ],\n      \"vulnerable\": [\n        {\n          \"pattern_name\": \"Stale Authentication Sessions\",\n          \"Instruction\": \"Long-running authentication sessions without re-authentication, indicating potential session hijacking vulnerability.\",\n          \"identifiable_fields\": [\n            \"times: List\",\n            \"orientations: List\"\n          ]\n        }\n      ]\n    }\n  },\n  \"entity_analysis_instructions\": {\n    \"source_profiling_queries\": [\n      {\n        \"query_name\": \"Identify Malicious and Anomalous Source Entities\",\n        \"instruction\": \"From the raw logs, extract and list all 'source_computer' and 'source_users' that are directly involved in the following patterns: 'Rapid Cross-System Authentication', 'Pass-the-Hash Authentication Anomalies', 'Credential Stuffing Attack Signatures', 'Service Account Abuse', 'Off-Hours Authentication Activity', 'Geographical Authentication Inconsistencies', 'Authentication Protocol Deviations', 'Authentication Frequency Spikes'.\"\n      }\n    ],\n    \"target_profiling_queries\": [\n      {\n        \"query_name\": \"Identify High-Value or Frequently Targeted Systems\",\n        \"instruction\": \"From the raw logs, extract and list all 'destination_computer' and 'destination_users' that are involved in patterns like 'Privilege Escalation Authentication Chains', 'Service Account Abuse', 'Legacy System Authentication' or appear as a target in multiple anomalous events.\"\n      }\n    ]\n  },\n  \"detection_rule_checklist\": [\n    {\n      \"detection_name\": \"Lateral Movement via Authentication Events\",\n      \"mapped_ttp\": \"T1021 (Remote Services), TA0008 (Lateral Movement)\",\n      \"threat_scenario\": \"Initial search using Windows security logs, looking for authentication events over the network from rare or unusual hosts or users.\",\n      \"detection_logic\": \"- Monitor `source_computer` and `destination_computer` for authentication chains\\n- Analyze `times` for rapid sequential authentications (< 5 minutes between systems)\\n- Filter `logon_type` = 3 (Network) and `statuses` = \\\"Success\\\"\\n- Cross-reference `source_users` and `destination_users` for privilege escalation patterns\",\n      \"detection_probability\": 0.0,\n      \"Details_reasoning_with_fields\": \"To detect this, you must analyze relationships between multiple log entries. Correlate successful network logons (logon_type: 3, statuses: Success) across different systems. A key indicator is seeing the same source_users authenticating to multiple destination_computer values in a short time window (times). The link between source_computer and destination_computer forms the lateral movement path.\"\n    },\n    {\n      \"detection_name\": \"Credential Dumping Detection\",\n      \"mapped_ttp\": \"T1003 (OS Credential Dumping), T1078 (Valid Accounts)\",\n      \"threat_scenario\": \"Credential dumping via Mimikatz is a technique used by attackers to extract sensitive authentication data. Attackers can use various methods to dump credentials such as exploiting vulnerabilities, keylogging, sniffing network traffic, or using tools like Mimikatz.\",\n      \"detection_logic\": \"- Monitor for unusual `auth_type` changes (Kerberos to NTLM)\\n- Detect multiple failed authentications followed by successful ones\\n- Analyze `source_users` for service accounts performing interactive logons\\n- Track `destination_computer` access to domain controllers\",\n      \"detection_probability\": 0.0,\n      \"Details_reasoning_with_fields\": \"This detection relies on behavioral anomalies. Look for a user (source_users) suddenly switching protocols (auth_type from Kerberos to NTLM), which can be a sign of a downgrade attack. Also, a spike in failed logins (statuses: Failure) followed by a success for the same source_users can indicate brute-forcing or password spraying. Pay special attention if the destination_computer is a domain controller, a primary target for credential harvesting.\"\n    },\n\n    {\n      \"detection_name\": \"Authentication Anomaly Detection\",\n      \"mapped_ttp\": \"T1078 (Valid Accounts), TA0008 (Lateral Movement)\",\n      \"threat_scenario\": \"Characterize an anomalous Windows authentication event through statistical rarity assessment.\",\n      \"detection_logic\": \"- Establish baseline authentication patterns using `times`, `source_computer`, `destination_computer`\\n- Calculate rarity scores for authentication combinations\\n- Flag deviations in `logon_type`, `auth_type`, and user behavior\\n- Monitor `orientations` for unusual logoff patterns\",\n      \"detection_probability\": 0.0,\n      \"Details_reasoning_with_fields\": \"This is a broad, baseline-dependent rule. The core task is to identify statistically rare events. This involves analyzing combinations of nearly all fields. For example, a user (source_users) logging in from an unusual source_computer at an abnormal time (times) with a logon_type they don't typically use would be a high-rarity event. Unusual logoff events (orientations) can also indicate a crashed or hijacked session.\"\n    }\n  ],\n  \"indicators_of_compromise\": [\n    {\n      \"indicator_category\": \"Authentication Failure Patterns\",\n      \"Instruction\": \"The most common and noisy indicators within event logs for lateral movement attempts are failed logins; the most common event IDs for this are 529 & 4625. Each method of lateral movement has its own set of associated event IDs. For example, attempts to login to accounts via SMB will generate event IDs 552 or 4648 (logon attempt using explicit credentials), and PsExec will show 601 or 4697 (service was installed in the system).\",\n      \"relevant_fields\": [\n        \"statuses: List\",\n        \"source_users: List\",\n        \"destination_users: List\",\n        \"destination_computer: List\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Credential Dumping Artifacts\",\n      \"Instruction\": \"LSASS credential dumping was first observed in the tactics, techniques, and procedures (TTPs) of several sophisticated threat activity groups—including actors that Microsoft tracks as HAFNIUM and GALLIUM. Detecting and stopping OS credential theft is therefore important because it can spell the difference between compromising or encrypting one device versus an entire network.\",\n      \"relevant_fields\": [\n        \"source_users: List\",\n        \"destination_users: List\",\n        \"auth_type: List\",\n        \"logon_type: List\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Lateral Movement Indicators\",\n      \"Instruction\": \"Based on searches, administrators connected over the network from specific IP addresses and gained command line access to victim hosts. Using psexec for lateral movement has been around for quite a while and is still very popular and relevant.\",\n      \"relevant_fields\": [\n        \"source_computer: List\",\n        \"destination_computer: List\",\n        \"source_users: List\",\n        \"logon_type: List\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Account Enumeration Signatures\",\n      \"Instruction\": \"Account enumeration is a more specific type of brute force attack where the attacker is attempting to guess the valid usernames of users within a network. These attacks are typically done when the malicious actor has limited information about their victim's network.\",\n      \"relevant_fields\": [\n        \"source_users: List\",\n        \"destination_users: List\",\n        \"statuses: List\",\n        \"source_computer: List\"\n      ]\n    }\n  ],\n  \"attack_pattern_checks\": [\n    {\n      \"attack_pattern_name\": \"Dictionary-based Password Attack (CAPEC-16)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Credential Dumping Detection' or 'Authentication Anomaly Detection' rules, specifically a high volume of failed logons from a single source against multiple users. As proof, provide the source entity, a sample of target users, and the relevant timestamps.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Password Brute Forcing (CAPEC-49)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence of a high volume of failed logons against a single user account from one or more sources, matching the 'Credential Dumping Detection' rule. As proof, provide the source(s), the target user, and the relevant timestamps.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Password Recovery Exploitation (CAPEC-50)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"This is difficult to detect with authentication logs alone. Set `is_present` to `true` only if you observe a suspicious successful logon immediately following activity related to password reset systems, if such context is available. Evidence should describe this correlation.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Rainbow Table Password Cracking (CAPEC-55)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"This is an offline attack and not directly visible in authentication logs. Do not set to true unless there is external intelligence suggesting this. You may see the result as a 'Valid Accounts' authentication.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Try Common or Default Usernames and Passwords (CAPEC-70)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe failed logon attempts for common usernames like 'admin', 'administrator', 'guest', etc. from an external or unusual source. As proof, list the attempted usernames and the source computer.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Brute Force (CAPEC-112)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Credential Dumping Detection' rule involving a high number of failed logons followed by a success. As proof, provide the source and target entities and the relevant timestamps.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Identity Spoofing (CAPEC-151)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe a user account logging in from a system or location that is highly anomalous for that user, especially if it coincides with other suspicious activity. As proof, describe the anomaly (e.g., user X logged in from server Y for the first time).\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Protocol Manipulation (CAPEC-192)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe evidence of an 'Authentication Protocol Deviation' pattern, such as a sudden switch from Kerberos to NTLM. As proof, provide the user, source, destination, and the protocol change observed.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Abuse of Functionality (CAPEC-210)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe the 'Service Account Abuse' pattern where a non-interactive account is used for an interactive logon. As proof, provide the service account name, the logon type, and the systems involved.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Cross-Site Scripting via Encoded URI Schemes (CAPEC-244)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"This is not typically detectable via Windows Authentication logs. Do not set to true.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Kerberoasting (CAPEC-509)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe a standard user account requesting a high number of Kerberos service tickets (TGS-REQ) for various services, especially if this is anomalous for the user. This may require deeper Kerberos event logging. As proof, list the user and the services for which tickets were requested.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Use of Known Domain Credentials (CAPEC-560)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if any of the 'Authentication Anomaly Detection' rules trigger, such as off-hours or geographically inconsistent logons. This pattern represents the outcome of a credential compromise. As proof, provide the details of the anomalous successful logon.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Windows Admin Shares with Stolen Credentials (CAPEC-561)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe the 'Lateral Movement via Authentication Events' detection rule triggering, specifically with a network logon (LogonType 3) to a high-value server or another workstation. As proof, provide the source/destination computers and the user account.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Password Spraying (CAPEC-565)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe a single source attempting to log in to many different user accounts with a small number of passwords (indicated by a large number of logon failures across many accounts from one source). As proof, provide the source computer and a list of targeted accounts.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Credential Stuffing (CAPEC-600)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe a high volume of failed logons from one or more sources across many different accounts, often followed by a few successes. This matches the 'Credential Stuffing Attack Signatures' pattern. As proof, provide the source(s) and the accounts involved.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Use of Captured Hashes (Pass The Hash) (CAPEC-645)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe the 'Pass-the-Hash Authentication Anomalies' pattern, such as a logon using NTLM where Kerberos is expected, especially for privileged accounts or to sensitive systems. As proof, detail the event, including the user, systems, and authentication protocol.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Use of Known Kerberos Credentials (CAPEC-652)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe lateral movement using Kerberos that is anomalous (e.g., user logging into a system they don't normally access). This can be identified by the 'Lateral Movement via Authentication Events' rule where the auth_type is Kerberos. As proof, provide the details of the anomalous successful Kerberos logon.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"Use of Known Operating System Credentials (CAPEC-653)\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"This is a general pattern. Set `is_present` to `true` if any of the primary detection rules ('Lateral Movement', 'Credential Dumping', 'Authentication Anomaly') are triggered with a successful logon. As proof, cite the rule that was triggered and the associated entities.\",\n      \"evidence\": []\n    }\n  ],\n  \"vulnerability_checks\": [\n    {\n      \"vulnerability_id\": \"CVE-2024-38030\",\n      \"is_present\": false,\n      \"evidence_instruction\": \"For CVE-2024-38030, set `is_present` to `true` if you observe an authentication coercion attack where a device is forced to send NTLM hashes to an attacker's system. This may manifest as an unexpected NTLM authentication attempt from a vulnerable system to an unknown or untrusted destination. As proof, describe the source of the coerced authentication and the destination it attempted to connect to.\",\n      \"evidence\": []\n    },\n    {\n      \"vulnerability_id\": \"CVE-2019-1040\",\n      \"is_present\": false,\n      \"evidence_instruction\": \"For CVE-2019-1040, set `is_present` to `true` if you observe an NTLM authentication bypass, which could appear as a successful NTLM logon where it should have failed or been blocked. This is hard to spot; look for successful NTLM logons to services that should be protected against such bypasses, especially if the source is unusual. As proof, detail the suspicious successful NTLM authentication.\",\n      \"evidence\": []\n    }\n  ]\n}\n```",
+  "model": "gemini-2.5-pro",
+  "provider": "gemini",
+  "report_source": "claude"
+}

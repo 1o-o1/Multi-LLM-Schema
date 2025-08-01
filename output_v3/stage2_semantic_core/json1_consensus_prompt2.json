@@ -1,0 +1,81 @@
+{
+  "log_type": "Windows Authentication Log",
+  "follow_up_queries": [
+    "Threat hunting queries for lateral movement using Windows authentication events",
+    "Detecting credential dumping attacks using Windows event logs"
+  ],
+  "fields": {
+    "source_computer": {
+      "type": "string",
+      "description": "The name or identifier of the computer where the authentication attempt originated.",
+      "OCSF": "source.device.hostname",
+      "ECS": "source.domain",
+      "OSSEM": "source.host.name",
+      "importance": 8
+    },
+    "destination_computer": {
+      "type": "string",
+      "description": "The name or identifier of the computer that was the target of the authentication attempt.",
+      "OCSF": "dst_endpoint.hostname",
+      "ECS": "destination.domain",
+      "OSSEM": "destination.host.name",
+      "importance": 8
+    },
+    "auth_type": {
+      "type": "string",
+      "description": "The authentication protocol used for the logon, such as Kerberos or NTLM.",
+      "OCSF": "auth.auth_protocol",
+      "ECS": "event.authentication_method",
+      "OSSEM": "authentication.package_name",
+      "importance": 7
+    },
+    "logon_type": {
+      "type": "string",
+      "description": "The type of logon that occurred, such as Network or Interactive.",
+      "OCSF": "logon_type",
+      "ECS": "winlog.logon.type",
+      "OSSEM": "logon.logon_type",
+      "importance": 7
+    },
+    "times": {
+      "type": "array",
+      "description": "A list of timestamps associated with the event. The raw log sample indicates multiple timestamps can be present for a single event.",
+      "OCSF": "time",
+      "ECS": "@timestamp",
+      "OSSEM": "event.time",
+      "importance": 9
+    },
+    "source_users": {
+      "type": "array",
+      "description": "The user account that initiated the logon request.",
+      "OCSF": "src.user.name",
+      "ECS": "source.user.name",
+      "OSSEM": "source.user.name",
+      "importance": 9
+    },
+    "destination_users": {
+      "type": "array",
+      "description": "The user account for which the new logon was created.",
+      "OCSF": "user.name",
+      "ECS": "destination.user.name",
+      "OSSEM": "object.user.name",
+      "importance": 9
+    },
+    "orientations": {
+      "type": "string",
+      "description": "The orientation of the event, indicating if it was a logon or logoff.",
+      "OCSF": "activity_name",
+      "ECS": "event.action",
+      "OSSEM": "action",
+      "importance": 8
+    },
+    "statuses": {
+      "type": "string",
+      "description": "The status of the authentication attempt, such as Success or Failure.",
+      "OCSF": "status",
+      "ECS": "event.outcome",
+      "OSSEM": "status",
+      "importance": 8
+    }
+  }
+}

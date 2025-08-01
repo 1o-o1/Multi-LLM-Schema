@@ -1,0 +1,86 @@
+{
+  "parsed_json": {
+    "log_type": "Windows Authentication Log",
+    "follow_up_queries": [
+      "Threat hunting queries for lateral movement using Windows authentication events",
+      "Detecting credential dumping attacks using Windows event logs"
+    ],
+    "fields": {
+      "source_computer": {
+        "type": "string",
+        "description": "The hostname or IP address of the system where the authentication request originated.",
+        "OCSF": "src_endpoint.hostname",
+        "ECS": "source.hostname",
+        "OSSEM": "source.host.name",
+        "importance": 8
+      },
+      "destination_computer": {
+        "type": "string",
+        "description": "The hostname or IP address of the system that the user is attempting to authenticate to.",
+        "OCSF": "dst_endpoint.hostname",
+        "ECS": "destination.hostname",
+        "OSSEM": "destination.host.name",
+        "importance": 8
+      },
+      "auth_type": {
+        "type": "string",
+        "description": "The authentication protocol used in the logon attempt, such as Kerberos or NTLM.",
+        "OCSF": "auth_protocol_name",
+        "ECS": "winlog.event_data.AuthenticationPackageName",
+        "OSSEM": "winlog.event_data.AuthenticationPackageName",
+        "importance": 7
+      },
+      "logon_type": {
+        "type": "string",
+        "description": "Specifies the type of logon that occurred, for example, Network, Interactive, or Service.",
+        "OCSF": "logon_type",
+        "ECS": "winlog.logon.type",
+        "OSSEM": "winlog.event_data.LogonType",
+        "importance": 8
+      },
+      "times": {
+        "type": "array",
+        "description": "The timestamp or series of timestamps when the event occurred.",
+        "OCSF": "time",
+        "ECS": "@timestamp",
+        "OSSEM": "event.created",
+        "importance": 9
+      },
+      "source_users": {
+        "type": "array",
+        "description": "The user account that initiated the logon from the source system.",
+        "OCSF": "actor.user.name",
+        "ECS": "source.user.name",
+        "OSSEM": "source.user.name",
+        "importance": 9
+      },
+      "destination_users": {
+        "type": "array",
+        "description": "The user account on the destination system for which the authentication was attempted.",
+        "OCSF": "user.name",
+        "ECS": "user.name",
+        "OSSEM": "user.name",
+        "importance": 9
+      },
+      "orientations": {
+        "type": "string",
+        "description": "The specific action being logged, such as a 'LogOn' or 'LogOff' event.",
+        "OCSF": "activity_name",
+        "ECS": "event.action",
+        "OSSEM": "event.action",
+        "importance": 8
+      },
+      "statuses": {
+        "type": "string",
+        "description": "The outcome of the authentication event, such as 'Success' or 'Failure'.",
+        "OCSF": "status",
+        "ECS": "event.outcome",
+        "OSSEM": "event.outcome",
+        "importance": 10
+      }
+    }
+  },
+  "raw_response": "```json\n{\n  \"log_type\": \"Windows Authentication Log\",\n  \"follow_up_queries\": [\n    \"Threat hunting queries for lateral movement using Windows authentication events\",\n    \"Detecting credential dumping attacks using Windows event logs\"\n  ],\n  \"fields\": {\n    \"source_computer\": {\n      \"type\": \"string\",\n      \"description\": \"The hostname or IP address of the system where the authentication request originated.\",\n      \"OCSF\": \"src_endpoint.hostname\",\n      \"ECS\": \"source.hostname\",\n      \"OSSEM\": \"source.host.name\",\n      \"importance\": 8\n    },\n    \"destination_computer\": {\n      \"type\": \"string\",\n      \"description\": \"The hostname or IP address of the system that the user is attempting to authenticate to.\",\n      \"OCSF\": \"dst_endpoint.hostname\",\n      \"ECS\": \"destination.hostname\",\n      \"OSSEM\": \"destination.host.name\",\n      \"importance\": 8\n    },\n    \"auth_type\": {\n      \"type\": \"string\",\n      \"description\": \"The authentication protocol used in the logon attempt, such as Kerberos or NTLM.\",\n      \"OCSF\": \"auth_protocol_name\",\n      \"ECS\": \"winlog.event_data.AuthenticationPackageName\",\n      \"OSSEM\": \"winlog.event_data.AuthenticationPackageName\",\n      \"importance\": 7\n    },\n    \"logon_type\": {\n      \"type\": \"string\",\n      \"description\": \"Specifies the type of logon that occurred, for example, Network, Interactive, or Service.\",\n      \"OCSF\": \"logon_type\",\n      \"ECS\": \"winlog.logon.type\",\n      \"OSSEM\": \"winlog.event_data.LogonType\",\n      \"importance\": 8\n    },\n    \"times\": {\n      \"type\": \"array\",\n      \"description\": \"The timestamp or series of timestamps when the event occurred.\",\n      \"OCSF\": \"time\",\n      \"ECS\": \"@timestamp\",\n      \"OSSEM\": \"event.created\",\n      \"importance\": 9\n    },\n    \"source_users\": {\n      \"type\": \"array\",\n      \"description\": \"The user account that initiated the logon from the source system.\",\n      \"OCSF\": \"actor.user.name\",\n      \"ECS\": \"source.user.name\",\n      \"OSSEM\": \"source.user.name\",\n      \"importance\": 9\n    },\n    \"destination_users\": {\n      \"type\": \"array\",\n      \"description\": \"The user account on the destination system for which the authentication was attempted.\",\n      \"OCSF\": \"user.name\",\n      \"ECS\": \"user.name\",\n      \"OSSEM\": \"user.name\",\n      \"importance\": 9\n    },\n    \"orientations\": {\n      \"type\": \"string\",\n      \"description\": \"The specific action being logged, such as a 'LogOn' or 'LogOff' event.\",\n      \"OCSF\": \"activity_name\",\n      \"ECS\": \"event.action\",\n      \"OSSEM\": \"event.action\",\n      \"importance\": 8\n    },\n    \"statuses\": {\n      \"type\": \"string\",\n      \"description\": \"The outcome of the authentication event, such as 'Success' or 'Failure'.\",\n      \"OCSF\": \"status\",\n      \"ECS\": \"event.outcome\",\n      \"OSSEM\": \"event.outcome\",\n      \"importance\": 10\n    }\n  }\n}\n```",
+  "model": "gemini-2.5-pro",
+  "provider": "gemini"
+}

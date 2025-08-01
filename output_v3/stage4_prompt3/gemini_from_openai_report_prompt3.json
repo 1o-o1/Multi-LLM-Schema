@@ -1,0 +1,477 @@
+{
+  "parsed_json": {
+    "Log_context": {
+      "log_type": "Windows Authentication Log",
+      "log_description": "Windows Authentication Logs are one of the most critical data sources for detecting and investigating adversary behavior, including credential theft, lateral movement, and persistence techniques. This report synthesizes industry and academic research, maps key MITRE ATT&CK® techniques, enumerates observable patterns in authentication events, and provides actionable detection and response guidance."
+    },
+    "observations": {
+      "behavioral_patterns": {
+        "malicious": [
+          {
+            "pattern_name": "Password Spraying",
+            "Instruction": "Broad targeting of multiple accounts from one host with low-frequency failures to evade lockout.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "destination_users: List",
+              "statuses: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Brute Force Attack",
+            "Instruction": "Rapid-fire authentication failures against a single account indicating credential guessing.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "destination_users: List",
+              "statuses: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Pass-the-Hash",
+            "Instruction": "Successful NTLM authentication (auth_type) on network logons (logon_type) without Kerberos fallback.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "logon_type: List",
+              "source_users: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Kerberoasting",
+            "Instruction": "Unusually high Kerberos service ticket requests for service accounts outside normal usage periods.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "destination_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Pass-the-Ticket",
+            "Instruction": "Multiple Kerberos (auth_type) logons for high-privilege accounts without prior ticket-granting ticket requests.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_users: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "RDP-based Lateral Movement",
+            "Instruction": "Interactive logons (logon_type: 10) from remote hosts not normally accessed by user.",
+            "identifiable_fields": [
+              "logon_type: List",
+              "source_computer: List",
+              "destination_computer: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Golden Ticket Use",
+            "Instruction": "Kerberos logons (auth_type) for non-existent or service accounts with no corresponding TGT events.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "destination_users: List",
+              "statuses: List"
+            ]
+          }
+        ],
+        "anomalous": [
+          {
+            "pattern_name": "Impossible Travel",
+            "Instruction": "Logons for same user from geographically disparate hosts within implausible timeframes.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Unusual Protocol Usage",
+            "Instruction": "NTLM logon events in environments locked to Kerberos-only authentication.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Out-of-Hours Logons",
+            "Instruction": "Successful logons occurring outside established business hours for a given user.",
+            "identifiable_fields": [
+              "times: List",
+              "source_users: List"
+            ]
+          },
+          {
+            "pattern_name": "Service Account Interactive Logon",
+            "Instruction": "Non-service hosts showing interactive (logon_type: 2) logons by service accounts.",
+            "identifiable_fields": [
+              "destination_users: List",
+              "logon_type: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Account Lockout Storm",
+            "Instruction": "Multiple failure events followed by a lockout (event ID 4740) within a short period.",
+            "identifiable_fields": [
+              "statuses: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "New Host Access",
+            "Instruction": "First-time successful logon by a user to a host in their typical domain scope.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Orphaned Logoff",
+            "Instruction": "Logon events with no subsequent logoff (orientations) indicating potential persistence.",
+            "identifiable_fields": [
+              "orientations: List",
+              "times: List"
+            ]
+          }
+        ],
+        "vulnerable": [
+          {
+            "pattern_name": "Legacy Protocol Fall-back",
+            "Instruction": "Use of LM or NTLMv1 protocols despite policy disabling them.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "Shared Account Across Hosts",
+            "Instruction": "Same account logging into multiple unrelated hosts simultaneously.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Disabled Account Attempts",
+            "Instruction": "Authentication failures (statuses: Failure) for known-disabled accounts.",
+            "identifiable_fields": [
+              "source_users: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "Excessive Failure Noise",
+            "Instruction": "High volume of failed logons from one host without any successes, indicating misconfiguration or reconnaissance.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "statuses: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Default Credential Usage",
+            "Instruction": "Attempts to log on with default or well-known account names (e.g., “Administrator”, “Guest”).",
+            "identifiable_fields": [
+              "destination_users: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "Non-Rotating Service Account Logon",
+            "Instruction": "Long-lived service accounts authenticating interactively at irregular intervals.",
+            "identifiable_fields": [
+              "destination_users: List",
+              "times: List",
+              "logon_type: List"
+            ]
+          }
+        ]
+      },
+      "temporal_patterns": {
+        "malicious": [
+          {
+            "pattern_name": "Password Spraying",
+            "Instruction": "Broad targeting of multiple accounts from one host with low-frequency failures to evade lockout.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "destination_users: List",
+              "statuses: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Brute Force Attack",
+            "Instruction": "Rapid-fire authentication failures against a single account indicating credential guessing.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "destination_users: List",
+              "statuses: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Kerberoasting",
+            "Instruction": "Unusually high Kerberos service ticket requests for service accounts outside normal usage periods.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "destination_users: List",
+              "times: List"
+            ]
+          }
+        ],
+        "anomalous": [
+          {
+            "pattern_name": "Impossible Travel",
+            "Instruction": "Logons for same user from geographically disparate hosts within implausible timeframes.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Out-of-Hours Logons",
+            "Instruction": "Successful logons occurring outside established business hours for a given user.",
+            "identifiable_fields": [
+              "times: List",
+              "source_users: List"
+            ]
+          },
+          {
+            "pattern_name": "Account Lockout Storm",
+            "Instruction": "Multiple failure events followed by a lockout (event ID 4740) within a short period.",
+            "identifiable_fields": [
+              "statuses: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Orphaned Logoff",
+            "Instruction": "Logon events with no subsequent logoff (orientations) indicating potential persistence.",
+            "identifiable_fields": [
+              "orientations: List",
+              "times: List"
+            ]
+          }
+        ],
+        "vulnerable": [
+          {
+            "pattern_name": "Shared Account Across Hosts",
+            "Instruction": "Same account logging into multiple unrelated hosts simultaneously.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Excessive Failure Noise",
+            "Instruction": "High volume of failed logons from one host without any successes, indicating misconfiguration or reconnaissance.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "statuses: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Non-Rotating Service Account Logon",
+            "Instruction": "Long-lived service accounts authenticating interactively at irregular intervals.",
+            "identifiable_fields": [
+              "destination_users: List",
+              "times: List",
+              "logon_type: List"
+            ]
+          }
+        ]
+      }
+    },
+    "entity_analysis_instructions": {
+      "source_profiling_queries": [
+        {
+          "query_name": "Identify Malicious and Anomalous Source Entities",
+          "instruction": "From the raw logs, extract and list all `source_computer` and `source_users` that are directly involved in the following patterns: 'Password Spraying', 'Brute Force Attack', 'Pass-the-Hash', 'Pass-the-Ticket', 'Impossible Travel', 'Unusual Protocol Usage', 'New Host Access', and 'Shared Account Across Hosts'."
+        }
+      ],
+      "target_profiling_queries": [
+        {
+          "query_name": "Identify High-Value or Frequently Targeted Entities",
+          "instruction": "From the raw logs, extract and list all `destination_computer` and `destination_users` that are involved in patterns like 'Pass-the-Hash', 'Kerberoasting', 'RDP-based Lateral Movement', 'Service Account Interactive Logon' or appear as a target in multiple anomalous events."
+        }
+      ]
+    },
+    "detection_rule_checklist": [
+      {
+        "detection_name": "Detect Password Spraying",
+        "mapped_ttp": "T1110.003",
+        "threat_scenario": "Count failed `statuses` per `source_computer` across ≥ 10 unique `destination_users` within 5 minutes.",
+        "detection_logic": "- Filter events where `statuses: Failure` and `times` in a rolling 5-minute window\n- Aggregate by `source_computer`, count distinct `destination_users`\n- Alert if count ≥ 10",
+        "detection_probability": null,
+        "Details_reasoning_with_fields": "To determine the probability, analyze the logs for events matching the detection logic. Specifically, look for a single `source_computer` generating failed authentication events (`statuses: Failure`) for ten or more distinct `destination_users` within a 5-minute `times` window. The presence of these correlated fields directly indicates a password spraying attack."
+      },
+      {
+        "detection_name": "Identify Pass-the-Hash",
+        "mapped_ttp": "T1550.002",
+        "threat_scenario": "Successful logon where `auth_type: NTLM`, `logon_type: 3 (Network)`, and destination account is high-privilege.",
+        "detection_logic": "- Filter events where `auth_type == \"NTLM\"` AND `logon_type == \"Network\"` AND `statuses == \"Success\"`\n- Destination account in privileged group list",
+        "detection_probability": null,
+        "Details_reasoning_with_fields": "To determine the probability, identify successful logons (`statuses: Success`) using the NTLM protocol (`auth_type: NTLM`) with a network logon type (`logon_type: 3 (Network)`). The key is to correlate this with the `destination_users` being a member of a high-privilege group. The combination of these specific field values is a strong indicator of a Pass-the-Hash attempt."
+      },
+      {
+        "detection_name": "Flag Kerberoasting Attempts",
+        "mapped_ttp": "T1558.003",
+        "threat_scenario": "≥ 5 Kerberos (`auth_type`) service ticket requests for a single `destination_users` within 10 minutes.",
+        "detection_logic": "- Filter events where `auth_type == \"Kerberos\"` AND `destination_users` is a service account\n- Aggregate by `destination_users`, count in rolling 10-minute window\n- Alert if count ≥ 5",
+        "detection_probability": null,
+        "Details_reasoning_with_fields": "To determine the probability, look for a high frequency of Kerberos authentication events (`auth_type: Kerberos`). The detection requires identifying a single service account (`destination_users`) receiving five or more service ticket requests within a 10-minute `times` window. This focuses on the temporal correlation of `auth_type` and `destination_users`."
+      },
+      {
+        "detection_name": "RDP Lateral Movement",
+        "mapped_ttp": "T1021.001",
+        "threat_scenario": "Interactive logon (`logon_type: 10`) from non-standard `source_computer` to domain workstations/servers.",
+        "detection_logic": "- Filter where `logon_type == \"Interactive\"` AND `source_computer` not in baseline list for user",
+        "detection_probability": null,
+        "Details_reasoning_with_fields": "To determine the probability, filter for interactive logons (`logon_type: 10`). The critical step is to check if the `source_computer` for a given logon is not on a pre-established baseline of allowed hosts for that `source_users`. The detection relies on the relationship between `logon_type`, `source_computer`, and the user's normal activity profile."
+      },
+      {
+        "detection_name": "MFA Fatigue Attack",
+        "mapped_ttp": "T1621",
+        "threat_scenario": "≥ 20 failed MFA-associated `statuses` for same `source_users` in 1 hour.",
+        "detection_logic": "- Correlate authentication events with MFA challenge outcome logs\n- Aggregate failure count by `source_users`\n- Alert if count ≥ 20 in 60 minutes",
+        "detection_probability": null,
+        "Details_reasoning_with_fields": "To determine the probability, you must correlate Windows authentication logs with MFA logs. The logic requires counting a high number of failed authentication events (`statuses: Failure`) for a single `source_users` over a 60-minute `times` window. The key is the high volume of failures for a specific user, indicating a bombardment attempt."
+      }
+    ],
+    "indicators_of_compromise": [
+      {
+        "indicator_category": "Unrecognized or Unusual Source Hostnames",
+        "Instruction": "Unrecognized or unusual `source_computer` identifiers may indicate attacker-controlled systems.",
+        "relevant_fields": [
+          "source_computer: List"
+        ]
+      },
+      {
+        "indicator_category": "Anomalous Destination Hostnames",
+        "Instruction": "Access attempts to critical servers (`destination_computer`), especially domain controllers.",
+        "relevant_fields": [
+          "destination_computer: List"
+        ]
+      },
+      {
+        "indicator_category": "Anomalous User Account Usage",
+        "Instruction": "Compromised or service accounts (`source_users`/`destination_users`) involved in anomalous logons.",
+        "relevant_fields": [
+          "source_users: List",
+          "destination_users: List"
+        ]
+      },
+      {
+        "indicator_category": "Divergent Authentication Protocols",
+        "Instruction": "NTLM vs Kerberos (`auth_type`) divergence from normal baselines.",
+        "relevant_fields": [
+          "auth_type: List"
+        ]
+      },
+      {
+        "indicator_category": "Anomalous Logon Types",
+        "Instruction": "Elevated remote interactive (`logon_type: 10`) vs console access.",
+        "relevant_fields": [
+          "logon_type: List"
+        ]
+      },
+      {
+        "indicator_category": "Unusual Timestamps",
+        "Instruction": "Off-hours or rapid successive events in `times` indicating brute force or reconnaissance.",
+        "relevant_fields": [
+          "times: List"
+        ]
+      },
+      {
+        "indicator_category": "Suspicious Event Outcomes",
+        "Instruction": "Repeated failures followed by success (`statuses`) indicating credential stuffing.",
+        "relevant_fields": [
+          "statuses: List"
+        ]
+      }
+    ],
+    "attack_pattern_checks": [
+      {
+        "attack_pattern_name": "T1078 - Valid Accounts",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence of legitimate credentials being used from unexpected source hosts or for disabled accounts. As proof, provide the source/destination entities and relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1110.001 - Brute Force",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Brute Force Attack' behavioral pattern. As proof, provide the source/destination entities and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1110.003 - Password Spraying",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Detect Password Spraying' detection rule. As proof, provide the source computer, the list of targeted users, and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1550.002 - Pass the Hash",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Identify Pass-the-Hash' detection rule. As proof, provide the source and destination entities, the protocol used, and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1558.003 - Kerberoasting",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Flag Kerberoasting Attempts' detection rule. As proof, provide the targeted service account and the relevant timestamps of the ticket requests.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1003.001 - OS Credential Dumping: LSASS Memory",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe subsequent machine-account logons from an unusual source computer with an unusual authentication type, which may indicate prior credential dumping. As proof, describe the anomalous machine-account logon event.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1021.001 - Remote Desktop Protocol",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'RDP Lateral Movement' detection rule. As proof, provide the source and destination hosts, the user, and the timestamp of the interactive logon.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1621 - Multi-Factor Authentication Request Generation",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'MFA Fatigue Attack' detection rule. As proof, provide the targeted user and the timeframe of the high-volume failed logon attempts.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1556.006 - Modify Authentication Process: Multi-Factor Authentication",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe a successful logon event for a new source computer registration under an existing user account, particularly on ADFS or Okta correlated events. As proof, detail the registration event.",
+        "evidence": []
+      }
+    ],
+    "vulnerability_checks": [
+      {
+        "vulnerability_id": "CVE-2022-30170 (Credential Roaming)",
+        "is_present": false,
+        "evidence_instruction": "For CVE-2022-30170, set `is_present` to `true` if you observe unusual LDAP attribute access or modifications related to credential roaming features, which may not be directly visible in authentication logs but could be correlated. As proof, describe any related anomalous LDAP events if available.",
+        "evidence": []
+      },
+      {
+        "vulnerability_id": "Legacy NTLM/LM Fallback",
+        "is_present": false,
+        "evidence_instruction": "Set `is_present` to `true` if you observe successful or failed authentication events where the `auth_type` is identified as 'LM' or 'NTLMv1', especially in an environment where policy should disable them. As proof, provide the event details including the protocol used and the involved entities.",
+        "evidence": []
+      }
+    ]
+  },
+  "raw_response": "```json\n{\n  \"Log_context\": {\n    \"log_type\": \"Windows Authentication Log\",\n    \"log_description\": \"Windows Authentication Logs are one of the most critical data sources for detecting and investigating adversary behavior, including credential theft, lateral movement, and persistence techniques. This report synthesizes industry and academic research, maps key MITRE ATT&CK® techniques, enumerates observable patterns in authentication events, and provides actionable detection and response guidance.\"\n  },\n  \"observations\": {\n    \"behavioral_patterns\": {\n      \"malicious\": [\n        {\n          \"pattern_name\": \"Password Spraying\",\n          \"Instruction\": \"Broad targeting of multiple accounts from one host with low-frequency failures to evade lockout.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"destination_users: List\",\n            \"statuses: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Brute Force Attack\",\n          \"Instruction\": \"Rapid-fire authentication failures against a single account indicating credential guessing.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"destination_users: List\",\n            \"statuses: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Pass-the-Hash\",\n          \"Instruction\": \"Successful NTLM authentication (auth_type) on network logons (logon_type) without Kerberos fallback.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"logon_type: List\",\n            \"source_users: List\",\n            \"destination_computer: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Kerberoasting\",\n          \"Instruction\": \"Unusually high Kerberos service ticket requests for service accounts outside normal usage periods.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"destination_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Pass-the-Ticket\",\n          \"Instruction\": \"Multiple Kerberos (auth_type) logons for high-privilege accounts without prior ticket-granting ticket requests.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"source_users: List\",\n            \"statuses: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"RDP-based Lateral Movement\",\n          \"Instruction\": \"Interactive logons (logon_type: 10) from remote hosts not normally accessed by user.\",\n          \"identifiable_fields\": [\n            \"logon_type: List\",\n            \"source_computer: List\",\n            \"destination_computer: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Golden Ticket Use\",\n          \"Instruction\": \"Kerberos logons (auth_type) for non-existent or service accounts with no corresponding TGT events.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"destination_users: List\",\n            \"statuses: List\"\n          ]\n        }\n      ],\n      \"anomalous\": [\n        {\n          \"pattern_name\": \"Impossible Travel\",\n          \"Instruction\": \"Logons for same user from geographically disparate hosts within implausible timeframes.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"source_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Unusual Protocol Usage\",\n          \"Instruction\": \"NTLM logon events in environments locked to Kerberos-only authentication.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"source_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Out-of-Hours Logons\",\n          \"Instruction\": \"Successful logons occurring outside established business hours for a given user.\",\n          \"identifiable_fields\": [\n            \"times: List\",\n            \"source_users: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Service Account Interactive Logon\",\n          \"Instruction\": \"Non-service hosts showing interactive (logon_type: 2) logons by service accounts.\",\n          \"identifiable_fields\": [\n            \"destination_users: List\",\n            \"logon_type: List\",\n            \"destination_computer: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Account Lockout Storm\",\n          \"Instruction\": \"Multiple failure events followed by a lockout (event ID 4740) within a short period.\",\n          \"identifiable_fields\": [\n            \"statuses: List\",\n            \"source_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"New Host Access\",\n          \"Instruction\": \"First-time successful logon by a user to a host in their typical domain scope.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"source_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Orphaned Logoff\",\n          \"Instruction\": \"Logon events with no subsequent logoff (orientations) indicating potential persistence.\",\n          \"identifiable_fields\": [\n            \"orientations: List\",\n            \"times: List\"\n          ]\n        }\n      ],\n      \"vulnerable\": [\n        {\n          \"pattern_name\": \"Legacy Protocol Fall-back\",\n          \"Instruction\": \"Use of LM or NTLMv1 protocols despite policy disabling them.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"statuses: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Shared Account Across Hosts\",\n          \"Instruction\": \"Same account logging into multiple unrelated hosts simultaneously.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"source_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Disabled Account Attempts\",\n          \"Instruction\": \"Authentication failures (statuses: Failure) for known-disabled accounts.\",\n          \"identifiable_fields\": [\n            \"source_users: List\",\n            \"statuses: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Excessive Failure Noise\",\n          \"Instruction\": \"High volume of failed logons from one host without any successes, indicating misconfiguration or reconnaissance.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"statuses: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Default Credential Usage\",\n          \"Instruction\": \"Attempts to log on with default or well-known account names (e.g., “Administrator”, “Guest”).\",\n          \"identifiable_fields\": [\n            \"destination_users: List\",\n            \"statuses: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Non-Rotating Service Account Logon\",\n          \"Instruction\": \"Long-lived service accounts authenticating interactively at irregular intervals.\",\n          \"identifiable_fields\": [\n            \"destination_users: List\",\n            \"times: List\",\n            \"logon_type: List\"\n          ]\n        }\n      ]\n    },\n    \"temporal_patterns\": {\n      \"malicious\": [\n        {\n          \"pattern_name\": \"Password Spraying\",\n          \"Instruction\": \"Broad targeting of multiple accounts from one host with low-frequency failures to evade lockout.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"destination_users: List\",\n            \"statuses: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Brute Force Attack\",\n          \"Instruction\": \"Rapid-fire authentication failures against a single account indicating credential guessing.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"destination_users: List\",\n            \"statuses: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Kerberoasting\",\n          \"Instruction\": \"Unusually high Kerberos service ticket requests for service accounts outside normal usage periods.\",\n          \"identifiable_fields\": [\n            \"auth_type: List\",\n            \"destination_users: List\",\n            \"times: List\"\n          ]\n        }\n      ],\n      \"anomalous\": [\n        {\n          \"pattern_name\": \"Impossible Travel\",\n          \"Instruction\": \"Logons for same user from geographically disparate hosts within implausible timeframes.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"source_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Out-of-Hours Logons\",\n          \"Instruction\": \"Successful logons occurring outside established business hours for a given user.\",\n          \"identifiable_fields\": [\n            \"times: List\",\n            \"source_users: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Account Lockout Storm\",\n          \"Instruction\": \"Multiple failure events followed by a lockout (event ID 4740) within a short period.\",\n          \"identifiable_fields\": [\n            \"statuses: List\",\n            \"source_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Orphaned Logoff\",\n          \"Instruction\": \"Logon events with no subsequent logoff (orientations) indicating potential persistence.\",\n          \"identifiable_fields\": [\n            \"orientations: List\",\n            \"times: List\"\n          ]\n        }\n      ],\n      \"vulnerable\": [\n        {\n          \"pattern_name\": \"Shared Account Across Hosts\",\n          \"Instruction\": \"Same account logging into multiple unrelated hosts simultaneously.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"source_users: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Excessive Failure Noise\",\n          \"Instruction\": \"High volume of failed logons from one host without any successes, indicating misconfiguration or reconnaissance.\",\n          \"identifiable_fields\": [\n            \"source_computer: List\",\n            \"statuses: List\",\n            \"times: List\"\n          ]\n        },\n        {\n          \"pattern_name\": \"Non-Rotating Service Account Logon\",\n          \"Instruction\": \"Long-lived service accounts authenticating interactively at irregular intervals.\",\n          \"identifiable_fields\": [\n            \"destination_users: List\",\n            \"times: List\",\n            \"logon_type: List\"\n          ]\n        }\n      ]\n    }\n  },\n  \"entity_analysis_instructions\": {\n    \"source_profiling_queries\": [\n      {\n        \"query_name\": \"Identify Malicious and Anomalous Source Entities\",\n        \"instruction\": \"From the raw logs, extract and list all `source_computer` and `source_users` that are directly involved in the following patterns: 'Password Spraying', 'Brute Force Attack', 'Pass-the-Hash', 'Pass-the-Ticket', 'Impossible Travel', 'Unusual Protocol Usage', 'New Host Access', and 'Shared Account Across Hosts'.\"\n      }\n    ],\n    \"target_profiling_queries\": [\n      {\n        \"query_name\": \"Identify High-Value or Frequently Targeted Entities\",\n        \"instruction\": \"From the raw logs, extract and list all `destination_computer` and `destination_users` that are involved in patterns like 'Pass-the-Hash', 'Kerberoasting', 'RDP-based Lateral Movement', 'Service Account Interactive Logon' or appear as a target in multiple anomalous events.\"\n      }\n    ]\n  },\n  \"detection_rule_checklist\": [\n    {\n      \"detection_name\": \"Detect Password Spraying\",\n      \"mapped_ttp\": \"T1110.003\",\n      \"threat_scenario\": \"Count failed `statuses` per `source_computer` across ≥ 10 unique `destination_users` within 5 minutes.\",\n      \"detection_logic\": \"- Filter events where `statuses: Failure` and `times` in a rolling 5-minute window\\n- Aggregate by `source_computer`, count distinct `destination_users`\\n- Alert if count ≥ 10\",\n      \"detection_probability\": null,\n      \"Details_reasoning_with_fields\": \"To determine the probability, analyze the logs for events matching the detection logic. Specifically, look for a single `source_computer` generating failed authentication events (`statuses: Failure`) for ten or more distinct `destination_users` within a 5-minute `times` window. The presence of these correlated fields directly indicates a password spraying attack.\"\n    },\n    {\n      \"detection_name\": \"Identify Pass-the-Hash\",\n      \"mapped_ttp\": \"T1550.002\",\n      \"threat_scenario\": \"Successful logon where `auth_type: NTLM`, `logon_type: 3 (Network)`, and destination account is high-privilege.\",\n      \"detection_logic\": \"- Filter events where `auth_type == \\\"NTLM\\\"` AND `logon_type == \\\"Network\\\"` AND `statuses == \\\"Success\\\"`\\n- Destination account in privileged group list\",\n      \"detection_probability\": null,\n      \"Details_reasoning_with_fields\": \"To determine the probability, identify successful logons (`statuses: Success`) using the NTLM protocol (`auth_type: NTLM`) with a network logon type (`logon_type: 3 (Network)`). The key is to correlate this with the `destination_users` being a member of a high-privilege group. The combination of these specific field values is a strong indicator of a Pass-the-Hash attempt.\"\n    },\n    {\n      \"detection_name\": \"Flag Kerberoasting Attempts\",\n      \"mapped_ttp\": \"T1558.003\",\n      \"threat_scenario\": \"≥ 5 Kerberos (`auth_type`) service ticket requests for a single `destination_users` within 10 minutes.\",\n      \"detection_logic\": \"- Filter events where `auth_type == \\\"Kerberos\\\"` AND `destination_users` is a service account\\n- Aggregate by `destination_users`, count in rolling 10-minute window\\n- Alert if count ≥ 5\",\n      \"detection_probability\": null,\n      \"Details_reasoning_with_fields\": \"To determine the probability, look for a high frequency of Kerberos authentication events (`auth_type: Kerberos`). The detection requires identifying a single service account (`destination_users`) receiving five or more service ticket requests within a 10-minute `times` window. This focuses on the temporal correlation of `auth_type` and `destination_users`.\"\n    },\n    {\n      \"detection_name\": \"RDP Lateral Movement\",\n      \"mapped_ttp\": \"T1021.001\",\n      \"threat_scenario\": \"Interactive logon (`logon_type: 10`) from non-standard `source_computer` to domain workstations/servers.\",\n      \"detection_logic\": \"- Filter where `logon_type == \\\"Interactive\\\"` AND `source_computer` not in baseline list for user\",\n      \"detection_probability\": null,\n      \"Details_reasoning_with_fields\": \"To determine the probability, filter for interactive logons (`logon_type: 10`). The critical step is to check if the `source_computer` for a given logon is not on a pre-established baseline of allowed hosts for that `source_users`. The detection relies on the relationship between `logon_type`, `source_computer`, and the user's normal activity profile.\"\n    },\n    {\n      \"detection_name\": \"MFA Fatigue Attack\",\n      \"mapped_ttp\": \"T1621\",\n      \"threat_scenario\": \"≥ 20 failed MFA-associated `statuses` for same `source_users` in 1 hour.\",\n      \"detection_logic\": \"- Correlate authentication events with MFA challenge outcome logs\\n- Aggregate failure count by `source_users`\\n- Alert if count ≥ 20 in 60 minutes\",\n      \"detection_probability\": null,\n      \"Details_reasoning_with_fields\": \"To determine the probability, you must correlate Windows authentication logs with MFA logs. The logic requires counting a high number of failed authentication events (`statuses: Failure`) for a single `source_users` over a 60-minute `times` window. The key is the high volume of failures for a specific user, indicating a bombardment attempt.\"\n    }\n  ],\n  \"indicators_of_compromise\": [\n    {\n      \"indicator_category\": \"Unrecognized or Unusual Source Hostnames\",\n      \"Instruction\": \"Unrecognized or unusual `source_computer` identifiers may indicate attacker-controlled systems.\",\n      \"relevant_fields\": [\n        \"source_computer: List\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Anomalous Destination Hostnames\",\n      \"Instruction\": \"Access attempts to critical servers (`destination_computer`), especially domain controllers.\",\n      \"relevant_fields\": [\n        \"destination_computer: List\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Anomalous User Account Usage\",\n      \"Instruction\": \"Compromised or service accounts (`source_users`/`destination_users`) involved in anomalous logons.\",\n      \"relevant_fields\": [\n        \"source_users: List\",\n        \"destination_users: List\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Divergent Authentication Protocols\",\n      \"Instruction\": \"NTLM vs Kerberos (`auth_type`) divergence from normal baselines.\",\n      \"relevant_fields\": [\n        \"auth_type: List\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Anomalous Logon Types\",\n      \"Instruction\": \"Elevated remote interactive (`logon_type: 10`) vs console access.\",\n      \"relevant_fields\": [\n        \"logon_type: List\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Unusual Timestamps\",\n      \"Instruction\": \"Off-hours or rapid successive events in `times` indicating brute force or reconnaissance.\",\n      \"relevant_fields\": [\n        \"times: List\"\n      ]\n    },\n    {\n      \"indicator_category\": \"Suspicious Event Outcomes\",\n      \"Instruction\": \"Repeated failures followed by success (`statuses`) indicating credential stuffing.\",\n      \"relevant_fields\": [\n        \"statuses: List\"\n      ]\n    }\n  ],\n  \"attack_pattern_checks\": [\n    {\n      \"attack_pattern_name\": \"T1078 - Valid Accounts\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence of legitimate credentials being used from unexpected source hosts or for disabled accounts. As proof, provide the source/destination entities and relevant timestamps.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"T1110.001 - Brute Force\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Brute Force Attack' behavioral pattern. As proof, provide the source/destination entities and the relevant timestamps.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"T1110.003 - Password Spraying\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Detect Password Spraying' detection rule. As proof, provide the source computer, the list of targeted users, and the relevant timestamps.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"T1550.002 - Pass the Hash\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Identify Pass-the-Hash' detection rule. As proof, provide the source and destination entities, the protocol used, and the relevant timestamps.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"T1558.003 - Kerberoasting\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'Flag Kerberoasting Attempts' detection rule. As proof, provide the targeted service account and the relevant timestamps of the ticket requests.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"T1003.001 - OS Credential Dumping: LSASS Memory\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe subsequent machine-account logons from an unusual source computer with an unusual authentication type, which may indicate prior credential dumping. As proof, describe the anomalous machine-account logon event.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"T1021.001 - Remote Desktop Protocol\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'RDP Lateral Movement' detection rule. As proof, provide the source and destination hosts, the user, and the timestamp of the interactive logon.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"T1621 - Multi-Factor Authentication Request Generation\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you find evidence matching the 'MFA Fatigue Attack' detection rule. As proof, provide the targeted user and the timeframe of the high-volume failed logon attempts.\",\n      \"evidence\": []\n    },\n    {\n      \"attack_pattern_name\": \"T1556.006 - Modify Authentication Process: Multi-Factor Authentication\",\n      \"is_present\": false,\n      \"evidence_Instruction\": \"Set `is_present` to `true` if you observe a successful logon event for a new source computer registration under an existing user account, particularly on ADFS or Okta correlated events. As proof, detail the registration event.\",\n      \"evidence\": []\n    }\n  ],\n  \"vulnerability_checks\": [\n    {\n      \"vulnerability_id\": \"CVE-2022-30170 (Credential Roaming)\",\n      \"is_present\": false,\n      \"evidence_instruction\": \"For CVE-2022-30170, set `is_present` to `true` if you observe unusual LDAP attribute access or modifications related to credential roaming features, which may not be directly visible in authentication logs but could be correlated. As proof, describe any related anomalous LDAP events if available.\",\n      \"evidence\": []\n    },\n    {\n      \"vulnerability_id\": \"Legacy NTLM/LM Fallback\",\n      \"is_present\": false,\n      \"evidence_instruction\": \"Set `is_present` to `true` if you observe successful or failed authentication events where the `auth_type` is identified as 'LM' or 'NTLMv1', especially in an environment where policy should disable them. As proof, provide the event details including the protocol used and the involved entities.\",\n      \"evidence\": []\n    }\n  ]\n}\n```",
+  "model": "gemini-2.5-pro",
+  "provider": "gemini",
+  "report_source": "openai"
+}

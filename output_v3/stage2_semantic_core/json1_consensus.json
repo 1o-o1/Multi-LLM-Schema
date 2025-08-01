@@ -1,0 +1,790 @@
+{
+  "parsed_json": {
+    "fields": {
+      "source_computer": {
+        "type": "string",
+        "description": "The name or identifier of the computer where the authentication attempt originated.",
+        "OCSF": "source.device.hostname",
+        "ECS": "source.domain",
+        "OSSEM": "source.host.name",
+        "importance": 8
+      },
+      "destination_computer": {
+        "type": "string",
+        "description": "The name or identifier of the computer that was the target of the authentication attempt.",
+        "OCSF": "dst_endpoint.hostname",
+        "ECS": "destination.domain",
+        "OSSEM": "destination.host.name",
+        "importance": 8
+      },
+      "auth_type": {
+        "type": "string",
+        "description": "The authentication protocol used for the logon, such as Kerberos or NTLM.",
+        "OCSF": "auth.auth_protocol",
+        "ECS": "event.authentication_method",
+        "OSSEM": "authentication.package_name",
+        "importance": 7
+      },
+      "logon_type": {
+        "type": "string",
+        "description": "The type of logon that occurred, such as Network or Interactive.",
+        "OCSF": "logon_type",
+        "ECS": "winlog.logon.type",
+        "OSSEM": "logon.logon_type",
+        "importance": 7
+      },
+      "times": {
+        "type": "array",
+        "description": "A list of timestamps associated with the event. The raw log sample indicates multiple timestamps can be present for a single event.",
+        "OCSF": "time",
+        "ECS": "@timestamp",
+        "OSSEM": "event.time",
+        "importance": 9
+      },
+      "source_users": {
+        "type": "array",
+        "description": "The user account that initiated the logon request.",
+        "OCSF": "src.user.name",
+        "ECS": "source.user.name",
+        "OSSEM": "source.user.name",
+        "importance": 9
+      },
+      "destination_users": {
+        "type": "array",
+        "description": "The user account for which the new logon was created.",
+        "OCSF": "user.name",
+        "ECS": "destination.user.name",
+        "OSSEM": "object.user.name",
+        "importance": 9
+      },
+      "orientations": {
+        "type": "string",
+        "description": "The orientation of the event, indicating if it was a logon or logoff.",
+        "OCSF": "activity_name",
+        "ECS": "event.action",
+        "OSSEM": "action",
+        "importance": 8
+      },
+      "statuses": {
+        "type": "string",
+        "description": "The status of the authentication attempt, such as Success or Failure.",
+        "OCSF": "status",
+        "ECS": "event.outcome",
+        "OSSEM": "status",
+        "importance": 8
+      }
+    },
+    "log_type": "Windows Security Authentication Log",
+    "observations": {
+      "behavioral_patterns": {
+        "malicious": [
+          {
+            "pattern_name": "Credential Stuffing Attack",
+            "Instruction": "Event ID 4625: Signals a failed logon attempt, which may indicate potential brute force attacks, password guessing attempts, or attempts to gain unauthorized access. Multiple failed authentication attempts from the same source using different usernames.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "source_users: List",
+              "destination_users: List",
+              "statuses: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Pass-the-Hash Attack",
+            "Instruction": "Pass-the-Hash is a lateral movement technique in which attackers steal a user's NTLM hash from one computer and use it to gain access to another computer. Look for successful NTLM authentication without corresponding Kerberos pre-authentication.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_computer: List",
+              "destination_computer: List",
+              "source_users: List",
+              "destination_users: List"
+            ]
+          },
+          {
+            "pattern_name": "Pass-the-Ticket Attack",
+            "Instruction": "Pass-the-Ticket is a lateral movement technique where attackers steal a Kerberos ticket from one computer and reuse it to access another. A Kerberos ticket is seen used on two or more different computers.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_computer: List",
+              "destination_computer: List",
+              "source_users: List"
+            ]
+          },
+          {
+            "pattern_name": "Golden Ticket Attack",
+            "Instruction": "This attack allows adversaries to forge a valid Ticket Granting Ticket (TGT) for any user by obtaining the NTLM hash of the 'krbtgt' domain account, enabling impersonation of any user, including high-privileged ones.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_users: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Overpass-the-Hash Attack",
+            "Instruction": "A post-exploitation technique where an attacker uses a captured NTLM hash to create a new authenticated session and obtain fresh Kerberos tickets, unlike traditional Pass-the-Hash.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_computer: List",
+              "destination_computer: List",
+              "source_users: List"
+            ]
+          }
+        ],
+        "anomalous": [
+          {
+            "pattern_name": "Service Account Interactive Logon",
+            "Instruction": "Event Id 4624 with logon types (2, 10, 7) and an account name like 'svc_*' or other internal service accounts indicates a possible interactive logon from a service account, which should typically only perform service-type authentication.",
+            "identifiable_fields": [
+              "source_users: List",
+              "logon_type: List",
+              "orientations: List"
+            ]
+          },
+          {
+            "pattern_name": "Privileged Account Lateral Movement",
+            "Instruction": "High-privilege accounts (e.g., Domain Admins) authenticating to low-privilege systems like standard user workstations via RDP is highly suspicious.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_computer: List",
+              "logon_type: List"
+            ]
+          },
+          {
+            "pattern_name": "First-Time Remote Access",
+            "Instruction": "A user who has never used remote access (`logon_type` 10 or 3) before suddenly does so successfully.",
+            "identifiable_fields": [
+              "source_users: List",
+              "logon_type: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "High-Frequency Successful Logons",
+            "Instruction": "A single user or service account authenticating successfully to hundreds of different machines in a very short period, indicative of automated scripts for discovery or deployment.",
+            "identifiable_fields": [
+              "source_users: List",
+              "destination_computer: List",
+              "times: List",
+              "statuses: List"
+            ]
+          },
+          {
+            "pattern_name": "Use of Multiple Accounts from One Host",
+            "Instruction": "A single workstation is used to successfully authenticate with numerous different user accounts (not service accounts) within a short window, potentially indicating a compromised host used for lateral movement.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "source_users: List",
+              "times: List",
+              "statuses: List"
+            ]
+          }
+        ],
+        "vulnerable": [
+          {
+            "pattern_name": "NTLM Downgrade Attack",
+            "Instruction": "Related to CVE-2019-1040, a man-in-the-middle attack can bypass the NTLM Message Integrity Check (MIC), allowing an attacker to downgrade security features and create authenticated sessions on behalf of other users.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_computer: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Weak Authentication Protocol Usage",
+            "Instruction": "NTLM's simplistic password hashing makes it vulnerable to pass-the-hash and brute-force attacks. Its usage indicates outdated cryptography.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_computer: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Legacy Protocol Authentication",
+            "Instruction": "Environments still using NTLM are susceptible to Overpass-the-Hash attacks. Its persistence is a significant vulnerability.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_computer: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Pre-Authentication Disabled Accounts",
+            "Instruction": "If Kerberos pre-authentication is disabled for an account, an adversary can request a Ticket Granting Ticket (TGT) for that user without needing a password, a technique known as AS-REP roasting.",
+            "identifiable_fields": [
+              "auth_type: List",
+              "source_users: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Machine Account Interactive Authentication",
+            "Instruction": "Event Id 4624 with logon types (10, 2) where the account name ends with a '$' (e.g., ItSupport$) can indicate a fake machine account being used for interactive logon.",
+            "identifiable_fields": [
+              "source_users: List",
+              "logon_type: List",
+              "orientations: List"
+            ]
+          }
+        ]
+      },
+      "temporal_patterns": {
+        "malicious": [
+          {
+            "pattern_name": "Suspicious Logoff Timings",
+            "Instruction": "Logoff events for admin accounts shortly after unauthorized logon.",
+            "identifiable_fields": [
+              "orientations: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Stealthy Kerberos Renewal",
+            "Instruction": "Frequent renewals (4768) without apparent need, indicating persistence.",
+            "identifiable_fields": [
+              "destination_computer: List",
+              "times: List",
+              "auth_type: List"
+            ]
+          }
+        ],
+        "anomalous": [
+          {
+            "pattern_name": "Impossible Travel",
+            "Instruction": "This detection identifies two user authentications from geographically distant locations within a time period shorter than the travel time between them, indicating compromised credentials. This often uses a machine-learning algorithm to filter out false positives like VPNs.",
+            "identifiable_fields": [
+              "source_computer: List",
+              "destination_computer: List",
+              "source_users: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Off-Hours Authentication",
+            "Instruction": "Attackers using harvested credentials may not adhere to the legitimate user's normal working hours. Look for authentication attempts outside of normal business hours for specific users.",
+            "identifiable_fields": [
+              "source_users: List",
+              "times: List",
+              "source_computer: List",
+              "destination_computer: List"
+            ]
+          },
+          {
+            "pattern_name": "Multiple Concurrent Sessions",
+            "Instruction": "Event Id 4624 showing more than one successful logon with logon type 3 or 10 from the same account name but different source network addresses indicates the same user account is authenticated from multiple locations simultaneously.",
+            "identifiable_fields": [
+              "source_users: List",
+              "source_computer: List",
+              "destination_computer: List",
+              "times: List"
+            ]
+          },
+          {
+            "pattern_name": "Suspicious Time-of-Day Logon",
+            "Instruction": "Successful logons outside business hours.",
+            "identifiable_fields": [
+              "times: List",
+              "statuses: List",
+              "source_users: List"
+            ]
+          }
+        ]
+      }
+    },
+    "detection_rule_checklist": [
+      {
+        "detection_name": "Multiple Failed Authentication Attempts (Brute Force Detection)",
+        "mapped_ttp": "T1110 (Brute Force)",
+        "threat_scenario": "Credential stuffing or brute force attacks",
+        "detection_logic": "Count `statuses` = \"Failure\" WHERE `source_computer` AND `times` within 5-minute window > 10",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "To determine the probability, analyze the logs for clusters of failed authentications. The key fields are `statuses`, `source_computer`, and `times`. A high count of 'Failure' statuses from a single `source_computer` within a short `times` window (5 minutes) strongly indicates a brute-force or credential stuffing attack (T1110). Correlate with multiple `destination_users` being targeted from that source."
+      },
+      {
+        "detection_name": "Pass-the-Hash Detection",
+        "mapped_ttp": "T1550.002 (Pass the Hash)",
+        "threat_scenario": "Credential theft and lateral movement using stolen password hashes",
+        "detection_logic": "`auth_type` = \"NTLM\" AND `statuses` = \"Success\" AND no preceding Kerberos authentication",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "The core of this detection is identifying successful (`statuses` = 'Success') NTLM (`auth_type` = 'NTLM') authentication. In a healthy Kerberos environment, this is anomalous. The absence of a preceding Kerberos ticket request for the same session is the key indicator of a Pass-the-Hash attempt (T1550.002). Correlate `source_users`, `source_computer`, and `destination_computer` to trace the lateral movement path."
+      },
+      {
+        "detection_name": "Impossible Travel Detection",
+        "mapped_ttp": "T1078 (Valid Accounts)",
+        "threat_scenario": "Account compromise and concurrent usage by legitimate user and attacker",
+        "detection_logic": "Same `source_users` with different `source_computer` locations within impossible travel time",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "This relies on geolocating the `source_computer` IP address for a successful logon by a specific `source_users`. If two successful logons for the same user occur from geographically distant locations within an impossible `times` window, it signals a compromised valid account (T1078). This requires enriching the log data with geolocation information."
+      },
+      {
+        "detection_name": "Privileged Account Anomaly",
+        "mapped_ttp": "T1078.002 (Domain Accounts)",
+        "threat_scenario": "Privilege escalation and lateral movement using compromised admin accounts",
+        "detection_logic": "`source_users` IN privileged_accounts AND `logon_type` = \"Interactive\" AND `destination_computer` IN workstations",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "Identify if a `source_users` belonging to a privileged group (e.g., Domain Admins) performs an interactive logon (`logon_type` = 'Interactive' or 'RemoteInteractive') to a standard `destination_computer` (a workstation, not a server). This is a strong indicator of lateral movement using a compromised privileged account (T1078.002)."
+      },
+      {
+        "detection_name": "Service Account Interactive Authentication",
+        "mapped_ttp": "T1078.003 (Local Accounts)",
+        "threat_scenario": "Service account compromise and misuse for interactive access",
+        "detection_logic": "`source_users` LIKE \"svc_*\" AND `logon_type` IN [\"Interactive\", \"RemoteInteractive\"]",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "Service accounts should not be used for interactive logons. Find events where the `source_users` matches a service account naming convention (e.g., starts with 'svc_') and the `logon_type` is 'Interactive' or 'RemoteInteractive'. This suggests the account has been compromised and is being used for hands-on access (T1078.003)."
+      },
+      {
+        "detection_name": "Off-Hours Authentication Anomaly",
+        "mapped_ttp": "T1078 (Valid Accounts)",
+        "threat_scenario": "After-hours unauthorized access or compromised credentials",
+        "detection_logic": "`source_users` authentication during non-business hours based on user baseline",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "This requires establishing a baseline of normal logon hours for each `source_users`. An alert should be triggered if the `times` of a successful authentication falls outside this established baseline. This is a general indicator of a compromised valid account (T1078)."
+      },
+      {
+        "detection_name": "Golden/Silver Ticket Detection",
+        "mapped_ttp": "T1558.001 (Golden Ticket), T1558.002 (Silver Ticket)",
+        "threat_scenario": "Forged Kerberos tickets for persistence and privilege escalation",
+        "detection_logic": "`auth_type` = \"Kerberos\" AND encryption_type = \"RC4-HMAC\" AND unusual ticket properties",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "This is an advanced detection. Look for Kerberos (`auth_type` = 'Kerberos') authentication events where weak or legacy encryption like RC4-HMAC is used, especially for TGT requests. This is a strong indicator of a Golden Ticket (T1558.001) or Overpass-the-Hash attack. The presence of a ticket for a user who does not exist or has unusual properties also points to this."
+      },
+      {
+        "detection_name": "NTLM Relay Attack Detection",
+        "mapped_ttp": "T1557.001 (LLMNR/NBT-NS Poisoning)",
+        "threat_scenario": "Network-based attacks leveraging NTLM authentication weaknesses",
+        "detection_logic": "`auth_type` = \"NTLM\" AND rapid authentication to multiple `destination_computer` from same `source_computer`",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "An NTLM relay attack involves an attacker's machine (`source_computer`) rapidly relaying NTLM (`auth_type` = 'NTLM') authentication requests from a victim to multiple `destination_computer` systems. Look for a single `source_computer` making many NTLM authentication attempts to different destinations in a very short `times` window. This points to poisoning attacks like T1557.001."
+      },
+      {
+        "detection_name": "High-Volume Failed Logons (Brute-Force/Spray)",
+        "mapped_ttp": "T1110 (Brute Force)",
+        "threat_scenario": "An attacker is attempting to guess user credentials.",
+        "detection_logic": "ALERT if count(statuses = 'Failure') > 20 within 5 minutes for the same source_computer OR ALERT if count(statuses = 'Failure') > 20 within 5 minutes for the same destination_users.",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "What is the probability this attack is detected? Provide the exact fields list and how they are related to the detection. Find information from the report."
+      },
+      {
+        "detection_name": "Potential Pass-the-Hash (PtH) Attempt",
+        "mapped_ttp": "T1550.002 (Use Alternate Authentication Material: Pass the Hash)",
+        "threat_scenario": "An attacker is using a stolen NTLM hash for lateral movement.",
+        "detection_logic": "ALERT on (logon_type = '3' AND auth_type = 'NTLM' AND statuses = 'Success') where source_users is a privileged account (e.g., Domain Admin) AND destination_computer is a workstation.",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "What is the probability this attack is detected? Provide the exact fields list and how they are related to the detection. Find information from the report."
+      },
+      {
+        "detection_name": "Remote Interactive Logon from Non-Admin Host",
+        "mapped_ttp": "T1021.001 (Remote Services: Remote Desktop Protocol)",
+        "threat_scenario": "An attacker is using RDP for lateral movement from a compromised workstation.",
+        "detection_logic": "ALERT on (logon_type = '10' AND statuses = 'Success') where destination_computer is a server OR domain controller AND source_computer is NOT in the list of approved administrative hosts.",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "What is the probability this attack is detected? Provide the exact fields list and how they are related to the detection. Find information from the report."
+      },
+      {
+        "detection_name": "Potential Kerberoasting",
+        "mapped_ttp": "T1558.003 (Steal or Forge Kerberos Tickets: Kerberoasting)",
+        "threat_scenario": "An attacker is attempting to steal the credential hash of a service account.",
+        "detection_logic": "ALERT on (auth_type = 'Kerberos' AND statuses = 'Success') where destination_users has a Service Principal Name (ends in '$') AND source_users is NOT a known administrative or service account.",
+        "detection_probability": "___",
+        "Details_reasoning_with_fields": "What is the probability this attack is detected? Provide the exact fields list and how they are related to the detection. Find information from the report."
+      },
+      {
+        "detection_name": "Brute Force Network Logons",
+        "mapped_ttp": "T1110 (Brute Force)",
+        "threat_scenario": "Trigger when `statuses`=Failure AND `logon_type`=Network for the same `destination_users` exceeds threshold X within Y minutes.",
+        "detection_logic": "Trigger when `statuses`=Failure AND `logon_type`=Network for the same `destination_users` exceeds threshold X within Y minutes.",
+        "detection_probability": 0.0,
+        "Details reasoning witb fields like previous points": "To determine the probability, analyze the logs for a high count of events where the 'statuses' field is 'Failure', the 'logon_type' is 'Network', and the 'destination_users' field is consistent across these events within a short time window defined by the 'times' field. A high frequency of this combination indicates a likely brute-force attack."
+      },
+      {
+        "detection_name": "Pass-the-Hash via NTLM",
+        "mapped_ttp": "T1550.002",
+        "threat_scenario": "Alert on 4624 events where `auth_type` includes NTLM AND no prior 4768 Kerberos TGT for that `source_users`.",
+        "detection_logic": "Alert on 4624 events where `auth_type` includes NTLM AND no prior 4768 Kerberos TGT for that `source_users`.",
+        "detection_probability": 0.0,
+        "Details reasoning witb fields like previous points": "To determine the probability, look for successful logon events (Event ID 4624) where the 'auth_type' is 'NTLM'. Then, verify that for the specific 'source_users' in that event, there was no preceding Kerberos Ticket Granting Ticket request (Event ID 4768) within a recent timeframe ('times'). The presence of a successful NTLM logon without a Kerberos ticket request is a strong indicator of Pass-the-Hash."
+      },
+      {
+        "detection_name": "Kerberoasting SPN Requests",
+        "mapped_ttp": "T1558.003",
+        "threat_scenario": "Spike in 4769 requests for non-standard SPNs by same `source_users`.",
+        "detection_logic": "Spike in 4769 requests for non-standard SPNs by same `source_users`.",
+        "detection_probability": 0.0,
+        "Details reasoning witb fields like previous points": "To determine the probability, monitor for a statistical anomaly (a spike) in the volume of Kerberos service ticket requests (Event ID 4769). The key fields to correlate are 'source_users' (the requester) and 'destination_users' (the Service Principal Name, or SPN). A single source user requesting an unusually high number of tickets for various service accounts in a short time ('times') is the primary indicator."
+      },
+      {
+        "detection_name": "Token Impersonation Sequence",
+        "mapped_ttp": "T1134.001",
+        "threat_scenario": "Sequential logon events for two distinct accounts on same host within short time.",
+        "detection_logic": "Sequential logon events for two distinct accounts on same host within short time.",
+        "detection_probability": 0.0,
+        "Details reasoning witb fields like previous points": "To determine the probability, search for a sequence of logon events (Event ID 4624) occurring within a very short time window ('times'). The pattern to match is two events on the same 'source_computer' but with different 'source_users', especially if one is a service account and the next is a privileged user account. This sequence suggests one session is spawning another with different credentials."
+      },
+      {
+        "detection_name": "NTLM Coercion Detection",
+        "mapped_ttp": "T1187",
+        "threat_scenario": "Outbound SMB negotiation attempts (`auth_type`=NTLM) to external IPs.",
+        "detection_logic": "Outbound SMB negotiation attempts (`auth_type`=NTLM) to external IPs.",
+        "detection_probability": 0.0,
+        "Details reasoning witb fields like previous points": "To determine the probability, filter for authentication events where the 'auth_type' is 'NTLM' and the 'destination_computer' is an external or non-domain IP address. This requires correlating authentication logs with network flow data or firewall logs to identify the external nature of the destination. Such outbound NTLM traffic is highly suspicious and indicative of a coercion attempt."
+      }
+    ],
+    "indicators_of_compromise": [
+      {
+        "indicator_category": "Authentication Failure Patterns",
+        "Instruction": "More than '10' EventID 4625 with different 'Account Name' and Sub status 0xc0000064 (user name does not exist) from a source network address that is not null, indicates possible account discovery (password spraying).",
+        "relevant_fields": [
+          "statuses:",
+          "source_users:",
+          "source_computer:"
+        ]
+      },
+      {
+        "indicator_category": "Suspicious Network Logons",
+        "Instruction": "Event ID 4624 with logon type 10 (Remote Interactive) from a source network that is not within your organization's subnets.",
+        "relevant_fields": [
+          "logon_type:",
+          "source_computer:"
+        ]
+      },
+      {
+        "indicator_category": "RDP Tunneling Indicators",
+        "Instruction": "Event ID 4624 with Logon type 10 (RemoteInteractive) where the source network address is a loopback address (127.x.x.x or ::1), often indicates RDP tunneling.",
+        "relevant_fields": [
+          "logon_type:",
+          "source_computer:"
+        ]
+      },
+      {
+        "indicator_category": "Lateral Movement Between Endpoints",
+        "Instruction": "Event ID 4624 with logon type 3 or 10 where both the source workstation name and destination are end-user machines (not servers).",
+        "relevant_fields": [
+          "logon_type:",
+          "source_computer:",
+          "destination_computer:"
+        ]
+      },
+      {
+        "indicator_category": "Kerberos Attack Indicators",
+        "Instruction": "A Kerberos authentication ticket (TGT) was requested with encryption type 0x17 (RC4-HMAC). This legacy encryption type can be evidence of an OverPass The Hash attack.",
+        "relevant_fields": [
+          "auth_type:"
+        ]
+      },
+      {
+        "indicator_category": "Anomalous Source Hostname/IP",
+        "Instruction": "A `source_computer` that is not part of the known corporate network or is on a blacklist attempting authentication.",
+        "relevant_fields": [
+          "source_computer:"
+        ]
+      },
+      {
+        "indicator_category": "Unauthorized Account Usage",
+        "Instruction": "The `source_users` or `destination_users` field shows activity from a disabled, dormant, or unauthorized account.",
+        "relevant_fields": [
+          "source_users:",
+          "destination_users:"
+        ]
+      },
+      {
+        "indicator_category": "Suspicious Authentication Patterns",
+        "Instruction": "A high ratio of failed to successful logons (`statuses`) from a single `source_computer`.",
+        "relevant_fields": [
+          "statuses:",
+          "source_computer:"
+        ]
+      },
+      {
+        "indicator_category": "Anomalous Logon Types",
+        "Instruction": "A `logon_type` that is inconsistent with the user's role, such as a service account performing an interactive logon.",
+        "relevant_fields": [
+          "logon_type:"
+        ]
+      },
+      {
+        "indicator_category": "Use of Weak/Legacy Protocols",
+        "Instruction": "The `auth_type` field indicates widespread use of NTLMv1 or other insecure protocols.",
+        "relevant_fields": [
+          "auth_type:"
+        ]
+      },
+      {
+        "indicator_category": "Known Malicious Tool Signatures",
+        "Instruction": "While not in the log itself, the *behavior* generated by tools like Mimikatz (e.g., specific logon patterns) can be an indicator.",
+        "relevant_fields": []
+      },
+      {
+        "indicator_category": "Anomalous User Account Names",
+        "Instruction": "Accounts observed in anomalous logons (e.g., service$, admin).",
+        "relevant_fields": [
+          "source_users:",
+          "destination_users:"
+        ]
+      },
+      {
+        "indicator_category": "Anomalous Hostnames/IP Addresses",
+        "Instruction": "`source_computer`, `destination_computer` involved in lateral movement or NTLM relay.",
+        "relevant_fields": [
+          "source_computer:",
+          "destination_computer:"
+        ]
+      },
+      {
+        "indicator_category": "Anomalous Authentication Protocols",
+        "Instruction": "Spikes in NTLM vs. Kerberos usage.",
+        "relevant_fields": [
+          "auth_type:"
+        ]
+      },
+      {
+        "indicator_category": "Anomalous Event IDs",
+        "Instruction": "4624, 4625, 4648, 4672, 4697, 4768, 4769 anomalies.",
+        "relevant_fields": []
+      }
+    ],
+    "attack_pattern_checks": [
+      {
+        "attack_pattern_name": "T1187 (Forced Authentication)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe unusual SMB authentication patterns in the `auth_type` field, especially if correlated with tools known to coerce authentication. As proof, provide the source and target entities and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1556 (Modify Authentication Process)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe anomalous `auth_type` values or unusual authentication flows not matching standard Kerberos or NTLM procedures. As proof, provide the source and target entities and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1003 (OS Credential Dumping)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if authentication events are correlated with subsequent suspicious process execution logs on the source computer, such as the execution of Mimikatz. As proof, provide the source and target entities and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1550.002 (Pass the Hash)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Pass-the-Hash Detection' rule. As proof, provide the source and target entities, and the relevant timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1550.003 (Pass the Ticket)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you observe a Kerberos ticket being used from multiple source computers for the same user. As proof, provide the source user and the multiple source computers and timestamps.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1558.001 (Golden Ticket)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Golden/Silver Ticket Detection' rule, especially involving high-privilege accounts. As proof, detail the unusual ticket properties, source, and target.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1558.002 (Silver Ticket)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Golden/Silver Ticket Detection' rule, often related to a specific service. As proof, detail the unusual ticket properties, source, target, and service.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1110 (Brute Force)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'Multiple Failed Authentication Attempts' rule. As proof, provide the source computer, the list of targeted users, and the time window of the attack.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1078 (Valid Accounts)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching 'Impossible Travel', 'Off-Hours Authentication', or 'Privileged Account Anomaly' rules. As proof, provide the user account, source/destination, and timestamps that constitute the anomaly.",
+        "evidence": []
+      },
+      {
+        "attack_pattern_name": "T1557.001 (LLMNR/NBT-NS Poisoning)",
+        "is_present": false,
+        "evidence_Instruction": "Set `is_present` to `true` if you find evidence matching the 'NTLM Relay Attack Detection' rule. As proof, provide the source relaying computer and the multiple destinations it authenticated to.",
+        "evidence": []
+      }
+    ],
+    "entity_analysis_instructions": {
+      "source_profiling_queries": [
+        {
+          "query_name": "Identify Malicious Source Actors",
+          "instruction": "From the raw logs, extract and list all `source_computer` and `source_users` that are directly involved in the following patterns: 'Credential Stuffing Attack', 'Pass-the-Hash Attack', 'Pass-the-Ticket Attack', 'Golden Ticket Attack', 'Overpass-the-Hash Attack', 'Impossible Travel', 'Off-Hours Authentication', 'Privileged Account Lateral Movement'."
+        }
+      ],
+      "target_profiling_queries": [
+        {
+          "query_name": "Identify High-Value or Frequently Targeted Systems",
+          "instruction": "From the raw logs, extract and list all `destination_computer` and `destination_users` that are involved in patterns like 'Privileged Account Lateral Movement', 'Golden Ticket Attack', 'Pass-the-Hash Attack', or that appear as a target in more than 10 events matching any malicious or anomalous patterns."
+        }
+      ]
+    }
+  },
+  "_field_property_stats": {
+    "total_fields": 9,
+    "properties_per_field": {
+      "source_computer": [
+        "type",
+        "description",
+        "OCSF",
+        "ECS",
+        "OSSEM",
+        "importance"
+      ],
+      "destination_computer": [
+        "type",
+        "description",
+        "OCSF",
+        "ECS",
+        "OSSEM",
+        "importance"
+      ],
+      "auth_type": [
+        "type",
+        "description",
+        "OCSF",
+        "ECS",
+        "OSSEM",
+        "importance"
+      ],
+      "logon_type": [
+        "type",
+        "description",
+        "OCSF",
+        "ECS",
+        "OSSEM",
+        "importance"
+      ],
+      "times": [
+        "type",
+        "description",
+        "OCSF",
+        "ECS",
+        "OSSEM",
+        "importance"
+      ],
+      "source_users": [
+        "type",
+        "description",
+        "OCSF",
+        "ECS",
+        "OSSEM",
+        "importance"
+      ],
+      "destination_users": [
+        "type",
+        "description",
+        "OCSF",
+        "ECS",
+        "OSSEM",
+        "importance"
+      ],
+      "orientations": [
+        "type",
+        "description",
+        "OCSF",
+        "ECS",
+        "OSSEM",
+        "importance"
+      ],
+      "statuses": [
+        "type",
+        "description",
+        "OCSF",
+        "ECS",
+        "OSSEM",
+        "importance"
+      ]
+    },
+    "semantic_selection_applied": true
+  },
+  "_consensus_metadata": {
+    "generation_timestamp": 1753887306.095744,
+    "consensus_parts_count": 5,
+    "filtered_parts_count": 5,
+    "contributing_sources": [
+      "openai_prompt1"
+    ],
+    "average_confidence": 0.5,
+    "processing_config": {
+      "consensus_strength": "comprehensive",
+      "use_sbert_embeddings": true,
+      "use_semantic_clustering": true,
+      "use_semantic_ted": true,
+      "use_bft_consensus": true,
+      "use_weighted_voting": false,
+      "use_mcts_optimization": false,
+      "use_ice_refinement": false,
+      "use_muse_adaptation": false,
+      "similarity_threshold": 0.1,
+      "consensus_threshold": 0.1,
+      "enable_research_mode": false,
+      "min_confidence_threshold": 0.0,
+      "preservation_ratio": 1.0,
+      "security_focus": false,
+      "min_part_size": 1,
+      "enable_prompt1_mode": true,
+      "deconstruction_strategy": "comprehensive",
+      "enable_llm_arbitration": true,
+      "llm_arbitration": {
+        "enable_for_metadata": true,
+        "conflict_detection_threshold": 0.3,
+        "arbitration_strategy": "semantic_similarity",
+        "use_lcs_analysis": true,
+        "metadata_priority_paths": [
+          "parsed_json.log_type",
+          "parsed_json.follow_up_queries"
+        ]
+      }
+    },
+    "hyperparameter_summary": {
+      "preservation_ratio": 1.0,
+      "strictness_level": "moderate",
+      "security_focus": false,
+      "content_complexity_preference": "balanced"
+    }
+  },
+  "_provenance": {
+    "part_contributions": {
+      "part_0": {
+        "contributing_sources": [
+          "openai_prompt1"
+        ],
+        "confidence": 0.5,
+        "is_merged": true,
+        "hyperparameter_filtered": false
+      },
+      "parsed_json.fields.source_users.OCSF": {
+        "contributing_sources": [
+          "openai_prompt1"
+        ],
+        "confidence": 0.5,
+        "is_merged": false,
+        "hyperparameter_filtered": false
+      },
+      "parsed_json.fields.source_users.ECS": {
+        "contributing_sources": [
+          "openai_prompt1"
+        ],
+        "confidence": 0.5,
+        "is_merged": false,
+        "hyperparameter_filtered": false
+      },
+      "part_3": {
+        "contributing_sources": [
+          "openai_prompt1"
+        ],
+        "confidence": 0.5,
+        "is_merged": true,
+        "hyperparameter_filtered": false
+      },
+      "parsed_json.fields.statuses.ECS": {
+        "contributing_sources": [
+          "openai_prompt1"
+        ],
+        "confidence": 0.5,
+        "is_merged": false,
+        "hyperparameter_filtered": false
+      }
+    }
+  }
+}

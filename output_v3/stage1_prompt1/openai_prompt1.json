@@ -1,0 +1,86 @@
+{
+  "parsed_json": {
+    "log_type": "Windows Security Log - Logon/Logoff Events",
+    "follow_up_queries": [
+      "threat hunting queries for Windows Security logon events",
+      "common attack vectors related to Windows logon/logoff events"
+    ],
+    "fields": {
+      "source_computer": {
+        "type": "string",
+        "description": "Name of the computer from which the logon/logoff event originated.",
+        "OCSF": "actor.machine.id",
+        "ECS": "source.host.name",
+        "OSSEM": "subject.machine.name",
+        "importance": 8
+      },
+      "destination_computer": {
+        "type": "string",
+        "description": "Name of the computer to which the logon/logoff event was directed.",
+        "OCSF": "target.machine.id",
+        "ECS": "destination.host.name",
+        "OSSEM": "object.machine.name",
+        "importance": 8
+      },
+      "auth_type": {
+        "type": "string",
+        "description": "Authentication package or protocol used (e.g., Kerberos, NTLM).",
+        "OCSF": "event.authentication_method",
+        "ECS": "user.authentication.type",
+        "OSSEM": "subject.credential.authentication_method",
+        "importance": 7
+      },
+      "logon_type": {
+        "type": "string",
+        "description": "Type of logon session (e.g., Network).",
+        "OCSF": "event.session.type",
+        "ECS": "winlog.event_data.LogonType",
+        "OSSEM": "subject.session.type",
+        "importance": 6
+      },
+      "times": {
+        "type": "string",
+        "description": "Timestamp of the event in HHMMSS format.",
+        "OCSF": "event.start",
+        "ECS": "event.time",
+        "OSSEM": "event.event.timestamp",
+        "importance": 8
+      },
+      "source_users": {
+        "type": "array",
+        "description": "List of user accounts on the source computer involved in the event.",
+        "OCSF": "actor.user.name",
+        "ECS": "source.user.name",
+        "OSSEM": "subject.user.name",
+        "importance": 10
+      },
+      "destination_users": {
+        "type": "array",
+        "description": "List of user accounts on the destination computer involved in the event.",
+        "OCSF": "target.user.name",
+        "ECS": "destination.user.name",
+        "OSSEM": "object.user.name",
+        "importance": 10
+      },
+      "orientations": {
+        "type": "string",
+        "description": "Operation type of the event (e.g., LogOn, LogOff).",
+        "OCSF": "event.action",
+        "ECS": "event.action",
+        "OSSEM": "event.action",
+        "importance": 6
+      },
+      "statuses": {
+        "type": "string",
+        "description": "Result of the logon/logoff operation (e.g., Success, Failure).",
+        "OCSF": "event.outcome",
+        "ECS": "event.outcome",
+        "OSSEM": "event.outcome",
+        "importance": 9
+      }
+    }
+  },
+  "raw_response": "{\"log_type\":\"Windows Security Log - Logon/Logoff Events\",\"follow_up_queries\":[\"threat hunting queries for Windows Security logon events\",\"common attack vectors related to Windows logon/logoff events\"],\"fields\":{\"source_computer\":{\"type\":\"string\",\"description\":\"Name of the computer from which the logon/logoff event originated.\",\"OCSF\":\"actor.machine.id\",\"ECS\":\"source.host.name\",\"OSSEM\":\"subject.machine.name\",\"importance\":8},\"destination_computer\":{\"type\":\"string\",\"description\":\"Name of the computer to which the logon/logoff event was directed.\",\"OCSF\":\"target.machine.id\",\"ECS\":\"destination.host.name\",\"OSSEM\":\"object.machine.name\",\"importance\":8},\"auth_type\":{\"type\":\"string\",\"description\":\"Authentication package or protocol used (e.g., Kerberos, NTLM).\",\"OCSF\":\"event.authentication_method\",\"ECS\":\"user.authentication.type\",\"OSSEM\":\"subject.credential.authentication_method\",\"importance\":7},\"logon_type\":{\"type\":\"string\",\"description\":\"Type of logon session (e.g., Network).\",\"OCSF\":\"event.session.type\",\"ECS\":\"winlog.event_data.LogonType\",\"OSSEM\":\"subject.session.type\",\"importance\":6},\"times\":{\"type\":\"string\",\"description\":\"Timestamp of the event in HHMMSS format.\",\"OCSF\":\"event.start\",\"ECS\":\"event.time\",\"OSSEM\":\"event.event.timestamp\",\"importance\":8},\"source_users\":{\"type\":\"array\",\"description\":\"List of user accounts on the source computer involved in the event.\",\"OCSF\":\"actor.user.name\",\"ECS\":\"source.user.name\",\"OSSEM\":\"subject.user.name\",\"importance\":10},\"destination_users\":{\"type\":\"array\",\"description\":\"List of user accounts on the destination computer involved in the event.\",\"OCSF\":\"target.user.name\",\"ECS\":\"destination.user.name\",\"OSSEM\":\"object.user.name\",\"importance\":10},\"orientations\":{\"type\":\"string\",\"description\":\"Operation type of the event (e.g., LogOn, LogOff).\",\"OCSF\":\"event.action\",\"ECS\":\"event.action\",\"OSSEM\":\"event.action\",\"importance\":6},\"statuses\":{\"type\":\"string\",\"description\":\"Result of the logon/logoff operation (e.g., Success, Failure).\",\"OCSF\":\"event.outcome\",\"ECS\":\"event.outcome\",\"OSSEM\":\"event.outcome\",\"importance\":9}}}",
+  "model": "o4-mini",
+  "provider": "openai"
+}
