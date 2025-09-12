@@ -8,6 +8,11 @@ import networkx as nx
 import logging
 from typing import Dict, List, Tuple, Any, Optional, Set
 from collections import defaultdict, Counter
+from sklearn.metrics import adjusted_rand_score
+import json
+
+logger = logging.getLogger(__name__)
+
 try:
     import community as community_louvain
 except ImportError:
@@ -19,10 +24,6 @@ except ImportError:
         logger.warning("Community detection module not available")
         community_louvain = None
         nx_community = None
-from sklearn.metrics import adjusted_rand_score
-import json
-
-logger = logging.getLogger(__name__)
 
 class GraphClustering:
     """GNN-based relationship analysis and community detection"""

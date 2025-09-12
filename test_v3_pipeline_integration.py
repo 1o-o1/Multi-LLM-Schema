@@ -34,7 +34,7 @@ def test_v3_pipeline_integration():
         # Test 1: Import and initialize V3_pipeline
         print("\n1. Testing V3_pipeline initialization...")
         
-        from V3_pipeline import V3Pipeline
+        from V3_pipeline import V3ConsensusPipeline as V3Pipeline
         
         # Initialize pipeline with architectural fixes config
         config = {
